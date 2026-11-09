@@ -1,0 +1,1289 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Vuela, bebe néctar y reta a tus amigos. Gratis, en el móvil, sin descargar nada.">
+<meta name="theme-color" content="#1b0f2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="icono.png">
+<link rel="apple-touch-icon" href="icono.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Colibrí · Pangea24">
+<meta property="og:description" content="Vuela, bebe néctar y reta a tus amigos. Gratis, en el móvil, sin descargar nada.">
+<meta property="og:url" content="https://pangea24.github.io/colibri/">
+<meta property="og:image" content="https://pangea24.github.io/colibri/compartir.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<title>Colibrí · Pangea24</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap">
+<style>
+  /* Mundos de Pangea, un solo aspecto a propósito (juego). Pantalla completa, el juego manda. */
+  :root {
+    color-scheme: dark;
+    --cielo-1: #1b0f2e;
+    --sol: #ffb347;
+    --papel: #fff6e8;
+    --tinta: #23122f;
+    --verdad: #2fbf71;
+    --mentira: #ef4f5f;
+    --vitamina: #ff9f1c;
+    --colibri: #2fd3a0;
+    --flor: #ff5fa2;
+    --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+    --texto: "Nunito", system-ui, sans-serif;
+  }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--cielo-1); color: var(--papel); font-family: var(--texto); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  #juego { position: fixed; inset: 0; display: block; width: 100%; height: 100%; }
+  .marcador { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 10px); left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--display); font-weight: 800; pointer-events: none; }
+  .marcador .puntos { font-size: 52px; line-height: 1; text-shadow: 0 3px 0 var(--tinta); }
+  .fila { display: flex; align-items: center; gap: 14px; }
+  .vitaminas { display: flex; gap: 6px; }
+  .pildora { width: 24px; height: 12px; border-radius: 7px; background: linear-gradient(90deg, var(--vitamina) 50%, var(--papel) 50%); box-shadow: 0 2px 0 var(--tinta); }
+  .pildora.gastada { opacity: 0.18; }
+  .vidas { display: flex; gap: 2px; font-size: 22px; line-height: 1; color: var(--flor); text-shadow: 0 2px 0 var(--tinta); }
+  .vidas .gastada { opacity: 0.18; }
+  .nectar { font-size: 16px; letter-spacing: 1px; text-shadow: 0 2px 0 var(--tinta); display: flex; align-items: center; gap: 6px; }
+  .nectar::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle, #ffe066 30%, var(--flor) 32%); }
+  .capa { position: fixed; inset: 0; display: grid; place-items: center; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px; background: rgba(27, 15, 46, 0.55); overflow-y: auto; }
+  .tarjeta { width: min(420px, 100%); background: var(--papel); color: var(--tinta); border-radius: 22px; padding: 24px 22px 22px; box-shadow: 0 10px 0 var(--tinta); text-align: center; display: grid; gap: 14px; }
+  .tarjeta h1, .tarjeta h2 { font-family: var(--display); margin: 0; line-height: 1.1; text-wrap: balance; }
+  .tarjeta h1 { font-size: 46px; }
+  .tarjeta h2 { font-size: 26px; }
+  .tarjeta p { margin: 0; font-size: 18px; line-height: 1.4; }
+  .etiqueta { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; color: #7a2f4f; }
+  .etiqueta.vit { color: #c2410c; }
+  .del-video { font-size: 14px; line-height: 1.35; opacity: 0.75; }
+  .opciones { display: grid; gap: 10px; }
+  button, .enlace { font-family: var(--display); font-weight: 800; font-size: 22px; border: 0; border-radius: 14px; padding: 13px 12px; cursor: pointer; color: #fff; box-shadow: 0 5px 0 var(--tinta); line-height: 1.15; text-decoration: none; display: block; }
+  button:active, .enlace:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--tinta); }
+  button:focus-visible, .enlace:focus-visible { outline: 3px solid var(--sol); outline-offset: 3px; }
+  .b-opcion { background: #3d1c45; font-size: 19px; }
+  .b-opcion.bien { background: var(--verdad); }
+  .b-opcion.mal { background: var(--mentira); }
+  .b-opcion:disabled { cursor: default; opacity: 1; }
+  .b-jugar { background: var(--tinta); width: 100%; }
+  .b-video { background: #e8365d; }
+  .b-compartir { background: transparent; color: var(--tinta); box-shadow: none; font-size: 18px; text-decoration: underline; padding: 4px; }
+  .capa.espera { pointer-events: none; }
+  /* Retos entre amigos */
+  .b-claro { color: var(--papel); text-shadow: 0 2px 0 var(--tinta); }
+  .fila-botones { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+  .meta { font-size: 15px; letter-spacing: 1px; color: var(--sol); text-shadow: 0 2px 0 var(--tinta); }
+  .reto-aviso { background: rgba(35, 18, 47, 0.82); border-radius: 14px; padding: 10px 12px; font-size: 16px; line-height: 1.35; }
+  .lista-retos { display: grid; gap: 10px; text-align: left; max-height: 38vh; overflow-y: auto; }
+  .amigo { background: #f1e3cc; border-radius: 12px; padding: 10px 12px; display: grid; gap: 6px; }
+  .amigo b { font-family: var(--display); font-size: 20px; }
+  .marcador-amigo { font-family: var(--display); font-weight: 800; font-size: 17px; line-height: 1.25; }
+  .b-chico { font-size: 17px; padding: 9px 10px; background: var(--tinta); }
+  .campo { font: inherit; font-size: 18px; padding: 12px; border-radius: 12px; border: 2px solid var(--tinta); background: #fff; color: var(--tinta); width: 100%; box-sizing: border-box; user-select: text; -webkit-user-select: text; }
+  .nota { font-size: 15px; line-height: 1.35; margin: 0; }
+  .mas-info { font-size: 15px; line-height: 1.4; color: var(--tinta); opacity: 0.8; }
+  .mas-info a { color: #b0204a; font-weight: 800; }
+  /* Enganche: sonido, salto del marcador, casi-récord, álbum y regalo diario */
+  .b-sonido { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 10px); right: max(12px, env(safe-area-inset-right, 0px)); width: 44px; height: 44px; padding: 0; border-radius: 50%; font-size: 20px; background: rgba(35, 18, 47, 0.6); box-shadow: none; display: grid; place-items: center; }
+  .marcador .puntos.salto { animation: salto 0.25s ease-out; }
+  @keyframes salto { 40% { transform: scale(1.3); } }
+  .casi { font-family: var(--display); font-weight: 800; font-size: 21px; line-height: 1.2; color: #b0204a; margin: 0; }
+  .cromos { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; max-height: 52vh; overflow-y: auto; }
+  .cromo { background: #f1e3cc; border-radius: 12px; padding: 8px 6px; display: grid; gap: 3px; align-content: start; font-size: 12.5px; line-height: 1.3; border: 2px solid var(--tinta); }
+  .cromo .icono { font-size: 30px; line-height: 1.1; }
+  .cromo b { font-family: var(--display); font-size: 15px; line-height: 1.1; }
+  .cromo a { color: #b0204a; font-weight: 800; }
+  .cromo.bloq { border-style: dashed; opacity: 0.6; }
+  .b-regalo { background: linear-gradient(#ffd166, #ff9f1c); color: var(--tinta); animation: latido 1.2s ease-in-out infinite; }
+  @keyframes latido { 50% { transform: scale(1.04); } }
+  @media (prefers-reduced-motion: reduce) { .b-regalo, .marcador .puntos.salto { animation: none; } }
+  .resultado { font-size: 17px; line-height: 1.4; padding: 12px; border-radius: 12px; background: #f1e3cc; }
+
+  /* Pantalla de inicio: deja ver el colibrí y la flor dibujados en el lienzo. */
+  #inicio { background: transparent; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding-top: calc(env(safe-area-inset-top, 0px) + 28px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); }
+  .logo { text-align: center; font-family: var(--display); font-weight: 800; }
+  .logo .nombre { display: block; font-size: clamp(60px, 17vw, 96px); line-height: 0.9; color: var(--papel); text-shadow: 0 5px 0 var(--tinta), 0 0 34px rgba(47, 211, 160, 0.55); }
+  .logo .marca { display: block; font-size: 17px; letter-spacing: 7px; color: var(--colibri); text-shadow: 0 2px 0 var(--tinta); }
+  .panel-inicio { width: min(380px, 100%); display: grid; gap: 10px; text-align: center; }
+  .b-grande { font-size: 32px; padding: 16px; background: linear-gradient(#ff7ab6, #e8365d); }
+  .record { font-family: var(--display); font-weight: 800; font-size: 18px; text-shadow: 0 2px 0 var(--tinta); }
+  .ayuda { margin: 0; font-size: 16px; line-height: 1.35; text-shadow: 0 2px 0 var(--tinta); }
+
+  .aviso { position: fixed; left: 16px; right: 16px; bottom: calc(env(safe-area-inset-bottom, 0px) + 16vh); text-align: center; font-family: var(--display); font-weight: 800; font-size: 26px; text-shadow: 0 3px 0 var(--tinta); pointer-events: none; }
+  .guia::before { content: ""; display: block; width: 46px; height: 46px; margin: 0 auto 8px; border-radius: 50%; border: 4px solid var(--papel); animation: pulso 0.9s ease-in-out infinite; }
+  @keyframes pulso { 50% { transform: scale(0.75); background: rgba(255, 246, 232, 0.35); } }
+  .cartel { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 104px); transform: translateX(-50%); width: min(380px, calc(100% - 32px)); background: rgba(35, 18, 47, 0.82); border-radius: 16px; padding: 10px 14px; text-align: center; pointer-events: none; animation: entra 0.4s ease-out; }
+  .cartel b { display: block; font-family: var(--display); font-size: 22px; color: var(--sol); }
+  .cartel span { font-size: 15px; line-height: 1.35; }
+  @keyframes entra { from { opacity: 0; transform: translate(-50%, -10px); } }
+  @media (prefers-reduced-motion: reduce) { .guia::before, .cartel { animation: none; } }
+</style>
+
+<canvas id="juego" aria-label="Juego del colibrí"></canvas>
+<button class="b-sonido" id="b-sonido" aria-label="Quitar sonido">🔊</button>
+<div class="marcador" id="marcador" hidden>
+  <span class="puntos" id="puntos">0</span>
+  <div class="fila">
+    <span class="vidas" id="vidas" aria-label="Vidas guardadas"><span>♥</span><span>♥</span><span>♥</span></span>
+    <span class="vitaminas" id="vitaminas" aria-label="Vitaminas"><span class="pildora"></span><span class="pildora"></span><span class="pildora"></span></span>
+    <span class="nectar" id="nectar">0/5</span>
+  </div>
+  <span class="meta" id="meta" hidden></span>
+</div>
+<div class="aviso" id="aviso" hidden>Mantén pulsado para seguir volando</div>
+<div class="aviso guia" id="guia" hidden>Mantén pulsado para flotar</div>
+<div class="cartel" id="cartel" hidden><b id="cartel-titulo"></b><span id="cartel-texto"></span></div>
+
+<div class="capa" id="inicio">
+  <div class="logo"><span class="nombre">Colibrí</span><span class="marca">PANGEA24</span></div>
+  <div class="panel-inicio">
+    <p class="ayuda" id="ayuda">Mantén pulsado para flotar y suelta para planear. Bebe néctar, atrapa las burbujas «?» para ganar vidas y cruza los mundos de Pangea.</p>
+    <div class="reto-aviso" id="reto-aviso" hidden></div>
+    <button class="b-jugar b-regalo" id="b-regalo" hidden>🎁 Abre tu regalo del día</button>
+    <button class="b-grande" id="jugar">Jugar</button>
+    <span class="record" id="record">Tu récord: 0</span>
+    <div class="fila-botones">
+      <button class="b-compartir b-claro" id="b-album">Álbum</button>
+      <button class="b-compartir b-claro" id="b-retos">Mis retos</button>
+      <button class="b-compartir b-claro" id="b-te-retaron">¿Te retaron?</button>
+      <button class="b-compartir b-claro" id="quitar-reto" hidden>Jugar sin reto</button>
+    </div>
+  </div>
+</div>
+
+<div class="capa" id="pregunta" hidden>
+  <div class="tarjeta">
+    <span class="etiqueta vit" id="vit-titulo">¡Chocaste! Usa una vitamina</span>
+    <h2 id="texto-pregunta"></h2>
+    <span class="del-video" id="del-video"></span>
+    <div class="opciones" id="opciones"></div>
+    <button class="b-compartir" id="pista">Pista: quita una respuesta mala (−3 puntos)</button>
+    <div class="resultado" id="explica" hidden></div>
+    <button class="b-jugar" id="seguir" hidden>Seguir volando</button>
+  </div>
+</div>
+
+<div class="capa" id="fin" hidden>
+  <div class="tarjeta">
+    <span class="etiqueta">Fin del vuelo</span>
+    <h1 id="final">0 puntos</h1>
+    <p class="casi" id="casi"></p>
+    <div class="resultado" id="reto-resultado" hidden></div>
+    <button class="b-grande" id="otra">Otra vez</button>
+    <button class="b-jugar" id="compartir">Reta a un amigo</button>
+    <button class="b-jugar" id="anuncio" hidden>📺 Mira un anuncio y sigue volando</button>
+    <button class="b-compartir" id="menu">Menú</button>
+  </div>
+</div>
+
+<div class="capa" id="retos" hidden>
+  <div class="tarjeta">
+    <span class="etiqueta">Retos entre amigos</span>
+    <h2>Mis retos</h2>
+    <p class="nota" id="sin-retos">Aún no tienes retos. Al acabar una partida, toca «Reta a un amigo» y mándale tu marca.</p>
+    <div class="lista-retos" id="lista-retos"></div>
+    <p class="nota"><b>¿Te mandaron un reto?</b> Pega aquí el mensaje o el código (por ejemplo, ANA-23).</p>
+    <input class="campo" id="codigo" type="text" autocomplete="off" placeholder="Pega el reto aquí">
+    <button class="b-jugar" id="aceptar-reto">Aceptar reto</button>
+    <p class="nota" id="codigo-msg" hidden></p>
+    <button class="b-compartir" id="cerrar-retos">Cerrar</button>
+  </div>
+</div>
+
+<div class="capa" id="album" hidden>
+  <div class="tarjeta">
+    <span class="etiqueta">Álbum de Pangea</span>
+    <h2 id="album-titulo">Tus cromos</h2>
+    <p class="nota">Acierta preguntas de cada vídeo y cruza los mundos para completarlo.</p>
+    <div class="cromos" id="cromos"></div>
+    <button class="b-jugar" id="cerrar-album">Cerrar</button>
+  </div>
+</div>
+
+<div class="capa" id="regalo" hidden>
+  <div class="tarjeta">
+    <span class="etiqueta">Regalo del día</span>
+    <h2 id="regalo-dia">Día 1</h2>
+    <p id="regalo-texto"></p>
+    <p class="nota" id="regalo-manana"></p>
+    <button class="b-grande" id="regalo-jugar">¡A volar!</button>
+  </div>
+</div>
+
+<div class="capa" id="nombre" hidden>
+  <div class="tarjeta">
+    <span class="etiqueta">Retos entre amigos</span>
+    <h2>¿Cómo te llamas?</h2>
+    <p class="nota">Tu nombre sale en los retos que mandes. Solo letras.</p>
+    <input class="campo" id="nombre-campo" type="text" maxlength="12" autocomplete="given-name" placeholder="Tu nombre">
+    <p class="nota" id="nombre-msg" hidden>Escribe al menos 2 letras.</p>
+    <button class="b-jugar" id="nombre-listo">Listo</button>
+    <button class="b-compartir" id="nombre-cerrar">Ahora no</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  // Vídeos de Pangea24 ya publicados en YouTube. Las preguntas salen solo de lo que dice su guion.
+  const VIDEOS = {
+    mar: ["El mar más salado del mundo se está secando, y el suelo cede", "https://youtu.be/EFUPUh27i4Q"],
+    taxi: ["Los taxistas de Londres tienen el cerebro distinto, y se lo fabricaron", "https://youtu.be/TBwkoHOnjgw"],
+    medusa: ["La medusa que vuelve a ser bebé: ¿inmortal o solo difícil de matar?", "https://youtu.be/Q8wTmIHFMHk"],
+    hioides: ["El hueso que flota en tu cuello: ¿un hueso roto prueba un crimen?", "https://youtu.be/BsI06rha0q0"],
+    tardi: ["El animal que sobrevivió al espacio… y muere a 37 °C: el tardígrado", "https://youtu.be/qqCiH-Pl6cU"],
+    madres: ["Madres extremas del reino animal: el parto más peligroso y 4 años sin comer", "https://youtu.be/DS9sgKVpErc"],
+    vago: ["Nervio vago: qué hace de verdad (y qué es mentira de «activarlo»)", "https://youtu.be/bsx1LoDqcQo"],
+    cornea: ["Tu ojo respira del aire: la córnea no tiene ni una gota de sangre", "https://youtu.be/LQ0RpswrdoI"],
+  };
+  // [vídeo, pregunta, respuesta buena, otra, otra, explicación]
+  const PREGUNTAS = [
+    ["mar", "¿Cuánta sal tiene el agua del mar Muerto?", "Alrededor del 34 %", "Algo más del 3 %", "Alrededor del 70 %", "Un 34 %. El océano tiene algo más del 3,5 %. Por eso flotas sin esfuerzo."],
+    ["mar", "¿Cuánto baja hoy el nivel del mar Muerto?", "Cerca de un metro al año", "Un centímetro al año", "Diez metros al año", "En torno a un metro al año. Desde los años sesenta ha bajado más de 25 metros."],
+    ["mar", "¿Qué abre los socavones en la orilla del mar Muerto?", "Agua dulce que disuelve sal enterrada", "Terremotos", "Volcanes bajo el agua", "El agua dulce disuelve capas de sal bajo el suelo, se forman huecos y el techo se hunde de golpe."],
+    ["taxi", "¿Qué parte del cerebro tienen más grande los taxistas de Londres?", "La parte de atrás del hipocampo", "El cerebelo", "La parte de delante del hipocampo", "La parte de atrás del hipocampo, la de los mapas mentales. La de delante, en cambio, era más pequeña."],
+    ["taxi", "¿Cuántas calles memorizan para el examen The Knowledge?", "Unas 25.000", "Unas 2.500", "Unas 250.000", "Unas 25.000 calles, sin GPS ni mapa. El aprendizaje dura de dos a cuatro años."],
+    ["medusa", "¿Cuánto mide la campana de la medusa que vuelve a ser bebé?", "Unos 4 o 5 milímetros", "Unos 4 o 5 centímetros", "Medio metro", "Unos 4 o 5 milímetros: el tamaño de una lenteja grande."],
+    ["medusa", "Cuando está a punto de morir, ¿en qué se convierte esta medusa?", "En pólipo, su primera etapa", "En un huevo", "En una piedra", "Se encoge, pierde los tentáculos, se pega al fondo y de ahí crece una colonia de pólipos."],
+    ["medusa", "¿Cómo se cree que esta medusa viajó por todo el mundo?", "En el agua de lastre de los barcos", "Pegada a las ballenas", "En las corrientes de un huracán", "Es la hipótesis más citada: los barcos cargan agua en un puerto y la vacían en otro."],
+    ["hioides", "¿A cuántos huesos está unido el hioides?", "A ninguno", "Solo a la mandíbula", "A la columna", "A ninguno. Cuelga de músculos y ligamentos, como una hamaca, y te ayuda a tragar y a hablar."],
+    ["hioides", "En los estrangulamientos que se estudiaron en 1996, ¿cuántas veces estaba roto el hioides?", "Uno de cada tres", "Siempre", "Nueve de cada diez", "Uno de cada tres. Por eso un hioides entero no descarta nada."],
+    ["tardi", "¿Qué temperatura mata a la mitad de los tardígrados despiertos en un día?", "Unos 37 °C, la de tu cuerpo", "100 °C", "20 °C bajo cero", "Unos 37 °C bastan si está despierto. Seco, en «tonel», aguanta mucho más."],
+    ["tardi", "¿Cómo se le llama también al tardígrado?", "Oso de agua", "Pulga de mar", "Gusano de hielo", "Oso de agua: mide medio milímetro, tiene ocho patas y camina despacio."],
+    ["tardi", "En 2007, ¿cuántos días pasaron los tardígrados al vacío del espacio?", "Diez días", "Un año", "Una hora", "Diez días fuera de la nave. Al volver, muchos revivieron."],
+    ["madres", "¿Qué tamaño tiene una cría de canguro rojo al nacer?", "Como una gominola, unos 2 cm", "Como un gato", "Como un huevo de gallina", "Unos 2 centímetros, ciega y sin pelo. Aun así trepa sola hasta la bolsa."],
+    ["madres", "¿Cuánto dura el embarazo del canguro rojo?", "Unos 33 días", "Nueve meses", "Un año y medio", "Apenas 33 días. Lo demás lo hace la cría dentro de la bolsa."],
+    ["madres", "¿Cuántos hijos a la vez puede tener una madre canguro?", "Tres, en tres fases distintas", "Solo uno", "Diez", "Tres: uno que ya camina, otro en la bolsa y un embrión en pausa en el útero."],
+    ["vago", "¿Cómo se le ocurrió a Otto Loewi el experimento del nervio vago?", "En un sueño", "Leyendo un libro", "Viendo a su gato", "En un sueño, la noche de Pascua de 1921. Le dio el Premio Nobel en 1936."],
+    ["vago", "¿Qué significa «vago» en el nombre del nervio vago?", "Errante, el que vagabundea", "Perezoso", "Pequeño", "Viene del latín: errante. Es el nervio que más lejos llega de los que nacen en la cabeza."],
+    ["vago", "¿Por qué a algunas personas les da tos al limpiarse el oído?", "Una rama del nervio vago llega al oído", "Por la cera", "Porque el oído toca los pulmones", "Una fibra del nervio vago llega a la piel del oído. Se llama reflejo de Arnold."],
+    ["cornea", "¿De dónde saca el oxígeno la córnea de tu ojo?", "Del aire, a través de las lágrimas", "De sus venas", "De la nariz", "Del aire, disuelto en tus lágrimas. No tiene ni un vaso sanguíneo."],
+    ["cornea", "Según los oculistas, ¿qué no debes hacer nunca?", "Dormir con lentes de contacto", "Parpadear mucho", "Mirar el cielo", "Dormir con lentes tapa la única ventana de la córnea: se queda sin aire y sube el riesgo de infección."],
+    ["cornea", "¿Cuántos trasplantes de córnea se hacen hoy al año?", "Más de 180.000", "Unos 100", "Unos 10 millones", "Más de 180.000. Como no tiene sangre, se trasplanta mejor que casi cualquier otro órgano."],
+  ];
+  // Mundos de Pangea: cambian cada 15 obstáculos. Cada uno con su paleta, sus capas y un dato.
+  const MUNDOS = [
+    { nombre: "Selva", cielo: ["#1b0f2e", "#7a2f4f", "#e0784a"], astro: ["rgba(255,179,71,0.9)", 0.72, 0.62, 0.12], lejos: "#3d1c45", cerca: "#16392f", forma: "picos",
+      tallo: ["#0f3326", "#2f7a52"], adorno: "#3f9a5f", deco: "hoja", punta: "#ff5fa2", bicho: "abeja", particula: "luciernaga", led: "#ffb347",
+      dato: "Un colibrí puede batir las alas hasta unas 80 veces por segundo." },
+    { nombre: "Arrecife", cielo: ["#03203a", "#0b5e7a", "#22a6a1"], rayos: true, lejos: "#0a4058", cerca: "#0c3a40", forma: "suave",
+      tallo: ["#6d1d45", "#e8576b"], adorno: "#ffb4a2", deco: "polipo", punta: "#ffd166", bicho: "medusa", particula: "burbuja", led: "#7df9ff",
+      dato: "Hay una medusa que, cuando va a morir, vuelve a ser pólipo: su primera etapa de vida." },
+    { nombre: "Desierto", cielo: ["#2a1033", "#c2410c", "#fbbf24"], astro: ["rgba(255,236,179,0.95)", 0.25, 0.55, 0.14], lejos: "#7c2d12", cerca: "#a1491a", forma: "dunas",
+      tallo: ["#14532d", "#4d9a52"], adorno: "#ecfccb", deco: "espina", punta: "#f472b6", bicho: "abeja", particula: "arena", led: "#ffe066",
+      dato: "La orilla del mar Muerto está unos 430 m bajo el nivel del mar: el punto más bajo de tierra firme." },
+    { nombre: "Hielo", cielo: ["#020617", "#0b1f3a", "#1d3b63"], astro: ["rgba(226,232,240,0.9)", 0.82, 0.18, 0.045], aurora: true, lejos: "#1e2a44", cerca: "#a8bfd6", forma: "picos",
+      tallo: ["#3b82a6", "#bae6fd"], adorno: "#ffffff", deco: "brillo", punta: "#e0f2fe", bicho: "copo", particula: "nieve", led: "#a7f3d0",
+      dato: "En la Antártida, dos tardígrados volvieron a moverse tras más de 30 años congelados." },
+  ];
+  // Álbum: un cromo por cada vídeo (se gana acertando una pregunta de ese vídeo) y uno por mundo.
+  const CROMOS = [
+    { id: "colibri", icono: "🌺", nombre: "Colibrí", dato: "Puede batir las alas hasta unas 80 veces por segundo.", como: "Termina tu primer vuelo." },
+    { id: "arrecife", icono: "🪸", nombre: "Arrecife", dato: "Los arrecifes de coral ocupan menos del 1 % del océano y dan casa a una de cada cuatro especies marinas.", como: "Llega al mundo Arrecife." },
+    { id: "desierto", icono: "🏜️", nombre: "Desierto", dato: "La orilla del mar Muerto está unos 430 m bajo el nivel del mar.", como: "Llega al mundo Desierto." },
+    { id: "hielo", icono: "❄️", nombre: "Hielo", dato: "En la Antártida, dos tardígrados revivieron tras más de 30 años congelados.", como: "Llega al mundo Hielo." },
+    { id: "mar", icono: "🧂", nombre: "Mar Muerto", dato: "Su agua tiene un 34 % de sal: por eso flotas sin esfuerzo.", como: "Acierta una pregunta del mar Muerto." },
+    { id: "taxi", icono: "🚕", nombre: "Taxistas de Londres", dato: "Memorizan unas 25.000 calles y se les agranda el hipocampo.", como: "Acierta una pregunta de los taxistas." },
+    { id: "medusa", icono: "🪼", nombre: "Medusa inmortal", dato: "Mide unos 4 o 5 mm y puede volver a ser pólipo.", como: "Acierta una pregunta de la medusa." },
+    { id: "hioides", icono: "🦴", nombre: "Hueso hioides", dato: "No está unido a ningún otro hueso: cuelga de músculos.", como: "Acierta una pregunta del hioides." },
+    { id: "tardi", icono: "🐻", nombre: "Oso de agua", dato: "El tardígrado aguantó diez días en el vacío del espacio.", como: "Acierta una pregunta del tardígrado." },
+    { id: "madres", icono: "🦘", nombre: "Canguro rojo", dato: "Al nacer mide unos 2 cm, como una gominola.", como: "Acierta una pregunta de las madres." },
+    { id: "vago", icono: "🧠", nombre: "Nervio vago", dato: "Otto Loewi soñó el experimento que le dio el Nobel.", como: "Acierta una pregunta del nervio vago." },
+    { id: "cornea", icono: "👁️", nombre: "Córnea", dato: "Respira del aire: no tiene ni un vaso sanguíneo.", como: "Acierta una pregunta de la córnea." },
+  ];
+  const CROMO_MUNDO = [null, "arrecife", "desierto", "hielo"];
+  // Letrero de luces LED del fondo: los canales y redes. Si un día hay patrocinador, se añade aquí una línea.
+  const LED_TEXTO = "SÍGUENOS EN TODAS LAS REDES  •  PANGEA24: ANIMALES Y CUERPO HUMANO  •  MYSTERIES24: CASOS REALES  •  ECONOMÍA2407  •  DURMIENDO DE LA MANO DE DIOS  •  INSTAGRAM @PANGEA24_ Y @MYSTERIES24_  •  YOUTUBE · FACEBOOK · INSTAGRAM · TIKTOK  •  ";
+  // Anuncio con recompensa: apagado. Se enciende solo cuando el juego viva en una web propia
+  // con Google H5 Games Ads (adBreak) y el usuario haya dado de alta su cuenta.
+  // Nunca se dan premios por abrir o ver nuestros vídeos: Facebook y YouTube lo prohíben.
+  const ANUNCIOS = false;
+  // Dónde vive el juego: "web" (itch.io y el enlace propio) o "crazygames" (lo cambia crazygames\empaquetar.py).
+  // En CrazyGames los anuncios los pone su SDK y ellos reparten lo que se gana. Nunca se premia ver nuestros vídeos.
+  const PLATAFORMA = "web";
+  const CG = () => {
+    const sdk = PLATAFORMA === "crazygames" && window.CrazyGames && window.CrazyGames.SDK;
+    return sdk && sdk.environment !== "disabled" ? sdk : null;
+  };
+  const plat = {
+    jugando: (si) => { try { const sdk = CG(); if (sdk) si ? sdk.game.gameplayStart() : sdk.game.gameplayStop(); } catch {} },
+    // tipo: "midgame" (entre partidas) o "rewarded" (el jugador lo pide). despues(true) si el anuncio se vio entero.
+    anuncio: (tipo, despues) => {
+      const sdk = CG();
+      if (!sdk) { despues(false); return; }
+      try {
+        sdk.ad.requestAd(tipo, {
+          adStarted: () => silenciar(true),
+          adFinished: () => { silenciar(false); despues(true); },
+          adError: () => { silenciar(false); despues(false); },
+        });
+      } catch { silenciar(false); despues(false); }
+    },
+    hayAnuncios: () => !!CG() || (ANUNCIOS && typeof window.adBreak === "function"),
+  };
+  // Las marcas también van donde mira el jugador: en el cielo, muy suaves, y en carteles colgados de los tallos.
+  const MARCAS = ["PANGEA24", "MYSTERIES24", "ECONOMÍA2407", "DURMIENDO DE LA MANO DE DIOS"];
+  const CARTELES = ["PANGEA24", "@PANGEA24_", "MYSTERIES24", "@MYSTERIES24_", "ECONOMÍA2407", "YOUTUBE · PANGEA24"];
+  const URL_JUEGO = "https://pangea24.github.io/colibri/";
+  const VIT_INICIO = 2, VIT_MAX = 3, FLORES_VIT = 5, CADA_MUNDO = 15, VIDAS_MAX = 3, CADA_BURBUJA = 20;
+  const TAU = Math.PI * 2;
+
+  const lienzo = document.getElementById("juego");
+  let ctx = lienzo.getContext("2d"); // la imagen para compartir lo cambia un momento
+  const $ = (id) => document.getElementById(id);
+  const mod = (a, b) => ((a % b) + b) % b;
+  let W = 0, H = 0, escala = 1;
+  const ajustar = () => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    lienzo.width = W * dpr; lienzo.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    escala = Math.min(1.25, Math.max(0.75, H / 800));
+  };
+  window.addEventListener("resize", ajustar);
+  ajustar();
+
+  let mejor = 0;
+  try { mejor = Number(localStorage.getItem("colibri-mejor")) || 0; } catch {}
+  $("record").textContent = `Tu récord: ${mejor}`;
+
+  const barajar = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  // El mazo dura entre partidas: no se repite una pregunta hasta que salen todas.
+  let mazo = barajar(PREGUNTAS.map((_, i) => i)), cursor = 0;
+  const siguientePregunta = () => {
+    if (cursor >= mazo.length) { mazo = barajar(mazo); cursor = 0; }
+    return PREGUNTAS[mazo[cursor++]];
+  };
+  // Partículas de fondo fijas; cada mundo las mueve a su manera.
+  const PARTICULAS = Array.from({ length: 42 }, () => ({ x: Math.random(), y: Math.random(), s: Math.random() }));
+
+  // El texto del letrero se convierte una vez en una matriz de luces (1 = encendida).
+  const FILAS = 11;
+  const led = (() => {
+    const c = document.createElement("canvas"), g = c.getContext("2d");
+    const fuente = "800 11px Arial, sans-serif";
+    g.font = fuente;
+    const ancho = Math.ceil(g.measureText(LED_TEXTO).width) + 2;
+    c.width = ancho; c.height = FILAS;
+    g.font = fuente; g.textBaseline = "middle"; g.fillStyle = "#fff";
+    g.fillText(LED_TEXTO, 0, FILAS / 2 + 0.5);
+    const d = g.getImageData(0, 0, ancho, FILAS).data, m = new Uint8Array(ancho * FILAS);
+    for (let i = 0; i < m.length; i++) m[i] = d[i * 4 + 3] > 110 ? 1 : 0;
+    return { ancho, m };
+  })();
+
+  const reducir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let estado = "inicio"; // inicio · vuelo · pregunta · listo · fin
+  let ave, cosas, chispas, puntos, pasadas, pares, flores, nectar, vitaminas, usadas, actual, vidas, proximaBurbuja, rescate, modo, yListo;
+  let t = 0, reloj = 0, ultimo = 0, fondoX = 0, escudo = 0, choque = 0, guia = 0, tocado = false;
+  let proximo = 0, medio = 0, medioHecho = true, mundo = 0, mundoAntes = 0, mezcla = 1;
+  let pulsado = false, temporizadorCartel = 0, fallada = false, revivido = false;
+  let colaCartel = [], cartelHasta = 0, textos = [], estela = [], temblor = 0, combo = 0, ultimaFlor = -9, rozados = 0, puntosVistos = 0, cromosPartida = 0;
+
+  // ---------- Sonido propio, hecho con código (sin archivos ni música de nadie) ----------
+  let sonido = true;
+  try { sonido = localStorage.getItem("colibri-sonido") !== "0"; } catch {}
+  let ac = null, zumbido = null, zumbando = false;
+  let callado = false;
+  const silenciar = (si) => {
+    callado = si;
+    if (si) zumbar(false);
+    try { if (ac) si ? ac.suspend() : ac.resume(); } catch {}
+  };
+  const audio = () => {
+    if (!sonido || callado) return null;
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === "suspended") ac.resume();
+    } catch { return null; }
+    return ac;
+  };
+  const tono = (f, dur, tipo = "sine", vol = 0.12, fFin = f, retraso = 0) => {
+    const a = audio(); if (!a) return;
+    const t0 = a.currentTime + retraso, o = a.createOscillator(), g = a.createGain();
+    o.type = tipo; o.frequency.setValueAtTime(f, t0); o.frequency.exponentialRampToValueAtTime(fFin, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g).connect(a.destination); o.start(t0); o.stop(t0 + dur + 0.02);
+  };
+  const ruido = (dur, vol, desde, hasta) => {
+    const a = audio(); if (!a) return;
+    const n = Math.floor(a.sampleRate * dur), b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const fuente = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(), t0 = a.currentTime;
+    fuente.buffer = b; f.type = "bandpass"; f.Q.value = 1.2;
+    f.frequency.setValueAtTime(desde, t0); f.frequency.exponentialRampToValueAtTime(hasta, t0 + dur);
+    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    fuente.connect(f).connect(g).connect(a.destination); fuente.start(t0);
+  };
+  const SON = {
+    pasar: () => tono(740, 0.09, "triangle", 0.06, 990),
+    // Cada flor seguida suena un poco más aguda: se oye el combo.
+    nectar: (n) => { const f = 880 * Math.pow(2, ((n - 1) * 2) / 12); tono(f, 0.18, "sine", 0.12); tono(f * 1.5, 0.22, "sine", 0.05, f * 1.5, 0.05); },
+    rozar: () => ruido(0.25, 0.25, 2500, 600),
+    choque: () => { tono(170, 0.28, "square", 0.08, 45); ruido(0.2, 0.25, 900, 120); },
+    hoja: () => tono(260, 0.22, "triangle", 0.1, 520),
+    burbuja: () => tono(500, 0.1, "sine", 0.12, 1200),
+    bien: () => [523, 659, 784, 1047].forEach((f, i) => tono(f, 0.16, "triangle", 0.08, f, i * 0.07)),
+    mal: () => { tono(330, 0.22, "sawtooth", 0.05, 220); tono(247, 0.3, "sawtooth", 0.05, 160, 0.16); },
+    mundo: () => [392, 523, 659, 784, 1047].forEach((f, i) => tono(f, 0.25, "sine", 0.08, f, i * 0.09)),
+    premio: () => [1047, 1319, 1568, 2093].forEach((f, i) => tono(f, 0.2, "sine", 0.07, f, 0.3 + i * 0.06)),
+  };
+  // Zumbido de alas mientras se mantiene pulsado.
+  const zumbar = (on) => {
+    if (on === zumbando) return;
+    zumbando = on;
+    const a = on ? audio() : ac;
+    if (!a) return;
+    if (!zumbido && on) {
+      const o = a.createOscillator(), lfo = a.createOscillator(), lg = a.createGain(), trem = a.createGain(), f = a.createBiquadFilter(), g = a.createGain();
+      o.type = "sawtooth"; o.frequency.value = 160; lfo.frequency.value = 38; lg.gain.value = 0.5; trem.gain.value = 0.5;
+      f.type = "lowpass"; f.frequency.value = 700; g.gain.value = 0;
+      lfo.connect(lg).connect(trem.gain);
+      o.connect(f).connect(trem).connect(g).connect(a.destination);
+      o.start(); lfo.start(); zumbido = g;
+    }
+    if (zumbido) zumbido.gain.setTargetAtTime(on ? 0.035 : 0, a.currentTime, 0.04);
+  };
+  const vibrar = (ms) => { try { if (sonido && navigator.vibrate) navigator.vibrate(ms); } catch {} };
+  const pintarSonido = () => {
+    $("b-sonido").textContent = sonido ? "🔊" : "🔇";
+    $("b-sonido").setAttribute("aria-label", sonido ? "Quitar sonido" : "Poner sonido");
+  };
+  $("b-sonido").onclick = (e) => {
+    if (sonido) zumbar(false);
+    sonido = !sonido;
+    try { localStorage.setItem("colibri-sonido", sonido ? "1" : "0"); } catch {}
+    pintarSonido(); if (sonido) SON.pasar();
+    e.currentTarget.blur();
+  };
+  pintarSonido();
+  const flotante = (x, y, txt, color = "#ffe066") => textos.push({ x, y, txt, color, vida: 0.9 });
+
+  // ---------- Álbum de cromos ----------
+  let cromos = [];
+  try { cromos = JSON.parse(localStorage.getItem("colibri-cromos")) || []; } catch {}
+  const pintarAlbumBotones = () => {
+    const txt = `Álbum ${cromos.length}/${CROMOS.length}`;
+    $("b-album").textContent = txt;
+  };
+  const ganarCromo = (id) => {
+    if (!id || cromos.includes(id)) return false;
+    cromos.push(id); cromosPartida++;
+    try { localStorage.setItem("colibri-cromos", JSON.stringify(cromos)); } catch {}
+    pintarAlbumBotones(); SON.premio();
+    return true;
+  };
+  const abrirAlbum = () => {
+    const caja = $("cromos");
+    caja.replaceChildren();
+    for (const c of CROMOS) {
+      const tiene = cromos.includes(c.id);
+      const d = document.createElement("div"); d.className = tiene ? "cromo" : "cromo bloq";
+      const i = document.createElement("span"); i.className = "icono"; i.textContent = tiene ? c.icono : "?";
+      const n = document.createElement("b"); n.textContent = tiene ? c.nombre : "???";
+      const x = document.createElement("span"); x.textContent = tiene ? c.dato : c.como;
+      d.append(i, n, x);
+      // Solo una recomendación: ver el vídeo no da nada.
+      if (tiene && VIDEOS[c.id] && PLATAFORMA === "web") {
+        const a = document.createElement("a"); a.href = VIDEOS[c.id][1]; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Ver vídeo ↗";
+        d.append(a);
+      }
+      caja.append(d);
+    }
+    $("album-titulo").textContent = cromos.length === CROMOS.length ? "¡Álbum completo!" : `Tienes ${cromos.length} de ${CROMOS.length}`;
+    mostrar("album");
+  };
+  $("b-album").onclick = abrirAlbum;
+  $("cerrar-album").onclick = () => { $("album").hidden = true; };
+
+  // ---------- Regalo del día con racha ----------
+  // Un regalo al día; si vuelves al día siguiente, la racha sube y el regalo crece. Si fallas un día, vuelve a 1.
+  const fecha = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  let diario = {};
+  try { diario = JSON.parse(localStorage.getItem("colibri-diario")) || {}; } catch {}
+  let regalo = null; // se aplica al empezar la próxima partida
+  const PREMIO = (r) => (r >= 3 ? { vit: 1, vidas: 2 } : r === 2 ? { vit: 1, vidas: 1 } : { vit: 1, vidas: 0 });
+  const textoPremio = (p) => (p.vidas ? `+${p.vit} vitamina y +${p.vidas} ${p.vidas === 1 ? "vida" : "vidas"}` : `+${p.vit} vitamina`);
+  const regaloDisponible = () => diario.dia !== fecha(new Date());
+  const rachaHoy = () => {
+    const h = new Date(), ayer = fecha(new Date(h.getFullYear(), h.getMonth(), h.getDate() - 1));
+    return diario.dia === ayer ? (diario.racha || 0) + 1 : 1;
+  };
+  const pintarRegalo = () => {
+    const si = regaloDisponible();
+    $("b-regalo").hidden = !si;
+  };
+  const abrirRegalo = () => {
+    const r = rachaHoy(), p = PREMIO(r);
+    diario = { dia: fecha(new Date()), racha: r };
+    try { localStorage.setItem("colibri-diario", JSON.stringify(diario)); } catch {}
+    regalo = p;
+    $("regalo-dia").textContent = r === 1 ? "🎁 Día 1" : `🔥 ¡${r} días seguidos!`;
+    $("regalo-texto").textContent = `Para tu próxima partida: ${textoPremio(p)}.`;
+    $("regalo-manana").textContent = `Vuelve mañana y tendrás ${textoPremio(PREMIO(r + 1))}. Si fallas un día, la racha vuelve a empezar.`;
+    pintarRegalo(); SON.premio(); mostrar("regalo");
+  };
+  $("b-regalo").onclick = abrirRegalo;
+
+  // ---------- Retos entre amigos ----------
+  // Sin cuentas ni servidor: cada móvil guarda sus duelos contra cada amigo.
+  // Un reto es un código NOMBRE-PUNTOS que se manda por mensaje y el otro pega en el juego.
+  // amigos[NOMBRE] = { ultima: su marca, clave: código del duelo en curso, mejor: mi mejor contra él,
+  //                    enCurso, historial: ["g" | "p" | "e", ...], visto }
+  let retos = {};
+  try { retos = JSON.parse(localStorage.getItem("colibri-retos")) || {}; } catch {}
+  retos.amigos = retos.amigos || {};
+  let superado = false;
+  const guardarRetos = () => { try { localStorage.setItem("colibri-retos", JSON.stringify(retos)); } catch {} };
+  const sinTildes = (x) => (x || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const limpiarNombre = (x) => sinTildes(x).replace(/[^A-Z]/g, "").slice(0, 12);
+  const bonito = (n) => n.charAt(0) + n.slice(1).toLowerCase();
+  const leerCodigo = (texto) => {
+    const m = sinTildes(texto).match(/([A-Z]{2,12})-(\d{1,5})/);
+    return m ? { nombre: m[1], puntos: Number(m[2]), clave: m[0] } : null;
+  };
+  const amigoActivo = () => (retos.activo && retos.amigos[retos.activo]) || null;
+  const resumenAmigo = (n, a) => {
+    const h = a.historial, yo = h.filter((x) => x === "g").length, el = h.filter((x) => x === "p").length;
+    const ult = h[h.length - 1];
+    let k = 0;
+    for (let i = h.length - 1; i >= 0 && h[i] === ult; i--) k++;
+    const racha = k < 2 || ult === "e" ? "" : ult === "g" ? ` · ¡${k} seguidas ganando!` : ` · ${bonito(n)} lleva ${k} seguidas`;
+    return `Tú ${yo} – ${el} ${bonito(n)}${racha}`;
+  };
+  const pintarReto = () => {
+    const a = amigoActivo();
+    $("reto-aviso").hidden = !a; $("quitar-reto").hidden = !a; $("meta").hidden = !a; $("ayuda").hidden = !!a;
+    if (!a) return;
+    $("reto-aviso").textContent = `${bonito(retos.activo)} te reta: ${a.ultima} puntos. ¡Supéralo!` + (a.historial.length ? ` (${resumenAmigo(retos.activo, a)})` : "");
+    $("meta").textContent = `META ${a.ultima} · ${retos.activo}`;
+  };
+  const aceptarReto = (r) => {
+    if (r.nombre === retos.nombre) return "Ese reto es tuyo: mándaselo a un amigo.";
+    const a = retos.amigos[r.nombre] || (retos.amigos[r.nombre] = { historial: [] });
+    if (a.clave !== r.clave) { a.ultima = r.puntos; a.clave = r.clave; a.mejor = null; a.enCurso = false; }
+    a.visto = Date.now(); retos.activo = r.nombre;
+    guardarRetos(); pintarReto();
+    return null;
+  };
+  // Cuenta un resultado por cada reto recibido; las revanchas pueden darle la vuelta.
+  const registrarReto = () => {
+    const a = amigoActivo();
+    if (!a) return null;
+    a.mejor = Math.max(a.mejor ?? -1, puntos);
+    const res = a.mejor > a.ultima ? "g" : a.mejor < a.ultima ? "p" : "e";
+    if (a.enCurso) a.historial[a.historial.length - 1] = res;
+    else { a.historial.push(res); a.enCurso = true; }
+    guardarRetos();
+    return res;
+  };
+
+  const pintarMarcador = () => {
+    [...$("vitaminas").children].forEach((p, i) => p.classList.toggle("gastada", i >= vitaminas));
+    [...$("vidas").children].forEach((p, i) => p.classList.toggle("gastada", i >= vidas));
+    $("nectar").textContent = `${nectar}/${FLORES_VIT}`;
+    $("puntos").textContent = puntos;
+    if (puntos > puntosVistos && !reducir) { const e = $("puntos"); e.classList.remove("salto"); void e.offsetWidth; e.classList.add("salto"); }
+    puntosVistos = puntos;
+    const a = amigoActivo();
+    if (a && estado === "vuelo" && !superado && puntos > a.ultima) {
+      superado = true;
+      cartel(`¡Superaste a ${bonito(retos.activo)}!`, "Sigue volando para sacarle más ventaja.", 2.5);
+    }
+  };
+  const reiniciar = () => {
+    ave = { x: W / 2 - 45 * escala, y: H * 0.47, v: 0 };
+    cosas = []; chispas = [];
+    puntos = 0; pasadas = 0; pares = 0; flores = 0; nectar = 0; vitaminas = VIT_INICIO; usadas = 0; actual = null;
+    t = 0; escudo = 0; choque = 0; proximo = 1.6; medioHecho = true;
+    textos = []; estela = []; temblor = 0; combo = 0; ultimaFlor = -9; rozados = 0; puntosVistos = 0; colaCartel = [];
+    mundo = 0; mundoAntes = 0; mezcla = 1;
+    vidas = 0; proximaBurbuja = 12; rescate = null; modo = "vitamina"; yListo = H * 0.45;
+    pintarMarcador();
+  };
+  reiniciar();
+
+  // Las tarjetas salen justo al chocar, con el dedo aún en la pantalla:
+  // durante medio segundo no aceptan toques, para no pulsar nada sin querer.
+  const mostrar = (id) => {
+    const c = $(id);
+    c.classList.add("espera"); c.hidden = false;
+    setTimeout(() => c.classList.remove("espera"), 600);
+  };
+  // colaCartel y cartelHasta se declaran con el resto del estado.
+  const cartel = (titulo, texto, segundos = 4.5) => {
+    // Si ya hay uno a la vista, este espera su turno (como mucho 3 en cola).
+    if (performance.now() < cartelHasta) { if (colaCartel.length < 3) colaCartel.push([titulo, texto, Math.min(segundos, 3)]); return; }
+    $("cartel-titulo").textContent = titulo; $("cartel-texto").textContent = texto;
+    const c = $("cartel"); c.hidden = true; void c.offsetWidth; c.hidden = false;
+    clearTimeout(temporizadorCartel);
+    cartelHasta = performance.now() + segundos * 1000;
+    temporizadorCartel = setTimeout(() => {
+      c.hidden = true; cartelHasta = 0;
+      const sig = colaCartel.shift();
+      if (sig) cartel(...sig);
+    }, segundos * 1000);
+  };
+
+  // ---------- Control: mantener para flotar, soltar para planear ----------
+  const SUBIR = 1700, V_SUBIDA = -300, GRAV = 1050, V_BAJADA = 330;
+  const pulsar = () => {
+    if (estado === "listo") { estado = "vuelo"; $("aviso").hidden = true; ultimo = performance.now(); }
+    if (estado !== "vuelo") return;
+    pulsado = true;
+    if (!tocado) { tocado = true; $("guia").hidden = true; }
+  };
+  const soltar = () => { pulsado = false; };
+  lienzo.addEventListener("pointerdown", (e) => { e.preventDefault(); pulsar(); });
+  window.addEventListener("pointerup", soltar);
+  window.addEventListener("pointercancel", soltar);
+  window.addEventListener("blur", soltar);
+  lienzo.addEventListener("contextmenu", (e) => e.preventDefault());
+  const escribiendo = (e) => e.target && e.target.tagName === "INPUT";
+  window.addEventListener("keydown", (e) => { if (escribiendo(e)) return; if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); if (!e.repeat) pulsar(); } });
+  window.addEventListener("keyup", (e) => { if (escribiendo(e)) return; if (e.code === "Space" || e.code === "ArrowUp") soltar(); });
+
+  const empezar = () => {
+    superado = false; fallada = false; cromosPartida = 0; revivido = false;
+    plat.jugando(true);
+    audio();
+    reiniciar();
+    if (regalo) {
+      vitaminas = Math.min(VIT_MAX, vitaminas + regalo.vit); vidas = Math.min(VIDAS_MAX, vidas + regalo.vidas);
+      cartel("¡Regalo del día!", `Empiezas con ${textoPremio(regalo)}.`, 2.5);
+      regalo = null; pintarMarcador();
+    }
+    pintarReto();
+    $("inicio").hidden = true; $("fin").hidden = true; $("marcador").hidden = false;
+    estado = "vuelo"; ultimo = performance.now();
+    guia = 2; tocado = false; pulsado = false; $("guia").hidden = false;
+  };
+  $("jugar").onclick = empezar;
+  $("regalo-jugar").onclick = () => { $("regalo").hidden = true; empezar(); };
+  pintarRegalo(); pintarAlbumBotones();
+  $("otra").onclick = () => (regaloDisponible() ? abrirRegalo() : plat.anuncio("midgame", () => empezar()));
+
+  // ---------- Al chocar: primero una vida guardada (la hoja te atrapa); si no hay, la vitamina ----------
+  const chocar = () => {
+    if (estado !== "vuelo" || escudo > 0) return;
+    if (vidas > 0) { rescatar(); return; }
+    choque = 0.35; pulsado = false; combo = 0;
+    SON.choque(); vibrar(70); if (!reducir) temblor = 14;
+    if (vitaminas <= 0) { terminar(); return; }
+    vitaminas--; usadas++; pintarMarcador();
+    preguntar("vitamina", vitaminas === 0 ? "¡Chocaste! Tu última vitamina" : `¡Chocaste! Usa una vitamina (te quedan ${vitaminas})`);
+  };
+  const rescatar = () => {
+    vidas--; pintarMarcador();
+    choque = 0.15; combo = 0;
+    SON.hoja(); vibrar(35); if (!reducir) temblor = 8;
+    ave.y = Math.min(H - 70 * escala, Math.max(40, ave.y));
+    rescate = { x: ave.x, y: ave.y + 24 * escala, vida: 1 };
+    ave.v = -380 * escala; escudo = 1.5;
+    cartel("¡Te salvó una vida!", "Una hoja te atrapó. Sigues desde aquí.", 2);
+  };
+  // La burbuja «?» es opcional: si aciertas, ganas una vida; si fallas, no pasa nada.
+  const atraparBurbuja = (o) => {
+    o.bebida = true; pulsado = false; SON.burbuja();
+    preguntar("burbuja", vidas < VIDAS_MAX ? "Burbuja: acierta y ganas una vida (fallar cuesta 5 puntos)" : "Burbuja: acierta y ganas 5 puntos (fallar cuesta 5)");
+  };
+  const preguntar = (cual, titulo) => {
+    estado = "pregunta"; modo = cual;
+    actual = siguientePregunta();
+    const [clave, texto, buena, ...resto] = actual;
+    $("vit-titulo").textContent = titulo;
+    $("texto-pregunta").textContent = texto;
+    $("del-video").textContent = `Del vídeo de Pangea24: «${VIDEOS[clave][0]}»`;
+    const caja = $("opciones");
+    caja.replaceChildren();
+    for (const op of barajar([buena, resto[0], resto[1]])) {
+      const b = document.createElement("button");
+      b.className = "b-opcion"; b.textContent = op;
+      b.onclick = () => responder(b, op === buena);
+      caja.append(b);
+    }
+    caja.hidden = false; $("explica").hidden = true; $("seguir").hidden = true;
+    $("pista").hidden = false;
+    mostrar("pregunta");
+  };
+  // Pista: quita una respuesta mala a cambio de 3 puntos.
+  $("pista").onclick = () => {
+    const malas = [...$("opciones").children].filter((b) => b.textContent !== actual[2] && !b.disabled);
+    if (!malas.length) return;
+    const b = malas[Math.floor(Math.random() * malas.length)];
+    b.disabled = true; b.style.opacity = "0.25";
+    puntos = Math.max(0, puntos - 3); pintarMarcador();
+    $("pista").hidden = true;
+  };
+  // Si fallas, fallaste: no se enseña la respuesta buena (está en el vídeo).
+  const responder = (boton, bien) => {
+    const explica = actual[5];
+    for (const b of $("opciones").children) b.disabled = true;
+    boton.classList.add(bien ? "bien" : "mal");
+    if (bien) SON.bien(); else { SON.mal(); vibrar(40); }
+    $("pista").hidden = true;
+    fallada = !bien;
+    let texto;
+    if (modo === "vitamina") texto = bien ? `¡Vitamina! Sigues volando. ${explica}` : "¡Fallaste! Se acabó el vuelo.";
+    else if (bien && vidas < VIDAS_MAX) { vidas++; texto = `¡Ganaste una vida! ${explica}`; }
+    else if (bien) { puntos += 5; texto = `¡+5 puntos! ${explica}`; }
+    else { puntos = Math.max(0, puntos - 5); texto = "¡Fallaste! Pierdes 5 puntos. Sigue volando."; }
+    if (bien && ganarCromo(actual[0])) texto += " 🃏 ¡Cromo nuevo para tu álbum!";
+    pintarMarcador();
+    $("explica").textContent = texto;
+    $("explica").hidden = false;
+    if (modo === "vitamina" && !bien) { setTimeout(() => { $("pregunta").hidden = true; terminar(); }, 1400); return; }
+    $("seguir").hidden = false;
+    $("seguir").focus();
+  };
+  $("seguir").onclick = () => {
+    $("pregunta").hidden = true;
+    if (modo === "vitamina") {
+      // Despeja el camino cercano y deja al colibrí en el centro, esperando un toque.
+      cosas = cosas.filter((o) => o.x > ave.x + 260 * escala);
+      proximo = Math.max(proximo, t + 0.9); medioHecho = true;
+      yListo = H * 0.45; escudo = 1.2;
+    } else {
+      // Tras la burbuja sigue en el mismo punto.
+      yListo = ave.y; escudo = Math.max(escudo, 0.8);
+    }
+    ave.y = yListo; ave.v = 0;
+    estado = "listo"; $("aviso").hidden = false;
+  };
+
+  const terminar = () => {
+    estado = "fin"; pulsado = false;
+    plat.jugando(false);
+    $("guia").hidden = true; $("aviso").hidden = true;
+    const antes = mejor;
+    if (puntos > mejor) { mejor = puntos; try { localStorage.setItem("colibri-mejor", String(mejor)); } catch {} }
+    // Lo que más hace volver a jugar: ver lo cerca que estuviste.
+    let casi = `Tu récord: ${Math.max(mejor, puntos)}`;
+    if (puntos > antes && antes > 0) casi = `¡Nuevo récord! Antes tenías ${antes}.`;
+    else if (puntos > antes && puntos > 0) casi = "¡Tu primer récord!";
+    else if (antes - puntos <= 5 && puntos > 0) casi = antes === puntos ? "¡Igualaste tu récord! Uno más y es tuyo." : `¡Uf! Te ${antes - puntos === 1 ? "faltó 1 punto" : `faltaron ${antes - puntos} puntos`} para tu récord.`;
+    $("casi").textContent = casi;
+    if (puntos > antes && puntos > 0) SON.premio();
+    ganarCromo("colibri");
+    pintarRegalo();
+    $("record").textContent = `Tu récord: ${mejor}`;
+    $("final").textContent = puntos === 1 ? "1 punto" : `${puntos} puntos`;
+    $("anuncio").hidden = !plat.hayAnuncios() || revivido;
+    // Duelo contra un amigo: resultado, marcador acumulado y la revancha como primera opción.
+    const res = registrarReto(), a = amigoActivo(), n = retos.activo && bonito(retos.activo);
+    $("reto-resultado").hidden = !res;
+    if (res) {
+      const ahora = puntos > a.ultima ? `¡Le ganaste a ${n}! ${puntos} a ${a.ultima}.` : puntos < a.ultima ? `${n} gana: ${a.ultima} a tus ${puntos}. ¡Revancha!` : `¡Empate a ${puntos} con ${n}!`;
+      $("reto-resultado").textContent = `${ahora} ${resumenAmigo(retos.activo, a)}`;
+    }
+    // Si hay regalo sin abrir, el botón de jugar lo abre: así siguen siendo solo dos opciones.
+    $("otra").textContent = res ? `Revancha contra ${n}` : regaloDisponible() ? "🎁 Abre tu regalo y juega" : "Otra vez";
+    $("compartir").textContent = res ? `Mándale tu marca a ${n}` : "Reta a un amigo";
+    mostrar("fin");
+    $("otra").focus();
+  };
+  $("anuncio").onclick = () => {
+    // Sigue en el mismo nivel, como con una vitamina acertada.
+    const seguir = () => { revivido = true; $("fin").hidden = true; modo = "vitamina"; plat.jugando(true); $("seguir").onclick(); };
+    if (CG()) { plat.anuncio("rewarded", (visto) => { if (visto) seguir(); }); return; }
+    window.adBreak({ type: "reward", name: "vida-extra", beforeReward: (mostrar) => mostrar(), adViewed: seguir, adDismissed: () => {} });
+  };
+
+  const pedirNombre = (despues) => {
+    $("nombre-msg").hidden = true; $("nombre-campo").value = "";
+    $("nombre").hidden = false; $("nombre-campo").focus();
+    $("nombre-listo").onclick = () => {
+      const n = limpiarNombre($("nombre-campo").value);
+      if (n.length < 2) { $("nombre-msg").hidden = false; return; }
+      retos.nombre = n; guardarRetos();
+      $("nombre").hidden = true; despues();
+    };
+  };
+  $("nombre-cerrar").onclick = () => { $("nombre").hidden = true; };
+  // Imagen vertical (historias y WhatsApp) con la marca, la puntuación y el código del reto.
+  const imagenReto = (marca, clave) => new Promise((listo) => {
+    const c = document.createElement("canvas"); c.width = 1080; c.height = 1920;
+    const g = c.getContext("2d"), m = MUNDOS[mundo];
+    const cielo = g.createLinearGradient(0, 0, 0, 1920);
+    m.cielo.forEach((col, i) => cielo.addColorStop(i / (m.cielo.length - 1), col));
+    g.fillStyle = cielo; g.fillRect(0, 0, 1080, 1920);
+    g.fillStyle = "rgba(255,179,71,0.35)"; g.beginPath(); g.arc(800, 1180, 260, 0, TAU); g.fill();
+    for (const [col, y0, amp] of [[m.lejos, 1430, 70], [m.cerca, 1600, 50]]) {
+      g.fillStyle = col; g.beginPath(); g.moveTo(0, 1920);
+      for (let x = 0; x <= 1080; x += 20) g.lineTo(x, y0 + Math.sin(x / 140 + y0) * amp);
+      g.lineTo(1080, 1920); g.fill();
+    }
+    const texto = (txt, y, tam, color, sombra = true) => {
+      g.font = `800 ${tam}px "Baloo 2", system-ui, sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
+      if (sombra) { g.fillStyle = "#23122f"; g.fillText(txt, 540, y + tam * 0.07); }
+      g.fillStyle = color; g.fillText(txt, 540, y);
+    };
+    texto("Colibrí", 230, 190, "#fff6e8");
+    texto("P A N G E A 2 4", 360, 54, "#2fd3a0");
+    // El mismo colibrí y la misma flor del juego, en grande.
+    const antes = [ctx, escala, escudo];
+    ctx = g; escala = 5; escudo = 0;
+    flor(700, 640, 70, "#ff5fa2", true);
+    colibri(430, 650, -200);
+    [ctx, escala, escudo] = antes;
+    texto(bonito(retos.nombre) + " hizo", 900, 70, "#fff6e8");
+    texto(String(marca), 1060, 270, "#ffe066");
+    texto(marca === 1 ? "punto" : "puntos", 1225, 70, "#fff6e8");
+    texto("¿Me superas?", 1380, 110, "#ffb347");
+    g.fillStyle = "rgba(35,18,47,0.85)";
+    g.beginPath(); if (g.roundRect) g.roundRect(90, 1560, 900, 270, 40); else g.rect(90, 1560, 900, 270); g.fill();
+    texto(`Código del reto: ${clave}`, 1630, 56, "#fff6e8", false);
+    texto("Juega gratis con el enlace del mensaje", 1715, 40, "#7df9ff", false);
+    texto("y toca «¿Te retaron?»", 1770, 40, "#7df9ff", false);
+    c.toBlob((b) => listo(b), "image/png");
+  });
+  const compartir = async () => {
+    if (!retos.nombre) { pedirNombre(compartir); return; }
+    const a = amigoActivo(), marca = a ? Math.max(a.mejor ?? 0, puntos) : puntos;
+    const clave = `${retos.nombre}-${marca}`;
+    const texto = `${bonito(retos.nombre)} te reta en el Colibrí de Pangea24: hice ${marca} puntos. ¿Me superas? Abre el juego, toca «¿Te retaron?» y pega este mensaje. Código: ${clave}`;
+    let enlace = `${URL_JUEGO}#reto=${clave}`;
+    try { const sdk = CG(); if (sdk) enlace = sdk.game.inviteLink({ reto: clave }); } catch {}
+    try {
+      // Con imagen si el móvil lo permite (WhatsApp, historias); si no, solo el texto.
+      let archivo = null;
+      try { const b = await imagenReto(marca, clave); if (b) archivo = new File([b], `colibri-${clave}.png`, { type: "image/png" }); } catch {}
+      if (archivo && navigator.canShare && navigator.canShare({ files: [archivo] })) {
+        await navigator.share({ title: "Colibrí · Pangea24", text: `${texto}\n${enlace}`, files: [archivo] }); return;
+      }
+      if (navigator.share) { await navigator.share({ title: "Colibrí · Pangea24", text: texto, url: enlace }); return; }
+      await navigator.clipboard.writeText(`${texto}\n${enlace}`);
+      $("compartir").textContent = "Reto copiado: pégalo en WhatsApp";
+    } catch (e) { if (!e || e.name !== "AbortError") $("compartir").textContent = `Tu código: ${clave}`; }
+  };
+  $("compartir").onclick = compartir;
+
+  // Lista de amigos con su marcador y botón para jugar contra su marca.
+  const abrirRetos = (enfocar) => {
+    const lista = $("lista-retos");
+    lista.replaceChildren();
+    const nombres = Object.keys(retos.amigos).sort((x, y) => (retos.amigos[y].visto || 0) - (retos.amigos[x].visto || 0));
+    $("sin-retos").hidden = nombres.length > 0;
+    for (const n of nombres) {
+      const a = retos.amigos[n];
+      const caja = document.createElement("div"); caja.className = "amigo";
+      const t = document.createElement("b"); t.textContent = bonito(n);
+      const m = document.createElement("span"); m.className = "marcador-amigo"; m.textContent = resumenAmigo(n, a);
+      const b = document.createElement("button"); b.className = "b-chico"; b.textContent = `Jugar contra su marca: ${a.ultima}`;
+      b.onclick = () => { retos.activo = n; a.visto = Date.now(); guardarRetos(); $("retos").hidden = true; empezar(); };
+      caja.append(t, m, b); lista.append(caja);
+    }
+    $("codigo").value = ""; $("codigo-msg").hidden = true;
+    $("retos").hidden = false;
+    if (enfocar) $("codigo").focus();
+  };
+  const volverInicio = () => {
+    reiniciar(); estado = "inicio";
+    $("fin").hidden = true; $("marcador").hidden = true; $("inicio").hidden = false;
+    pintarReto();
+  };
+  $("b-retos").onclick = () => abrirRetos(false);
+  $("menu").onclick = volverInicio;
+  $("b-te-retaron").onclick = () => abrirRetos(true);
+  $("cerrar-retos").onclick = () => { $("retos").hidden = true; };
+  $("quitar-reto").onclick = () => { retos.activo = null; guardarRetos(); pintarReto(); };
+  $("aceptar-reto").onclick = () => {
+    const r = leerCodigo($("codigo").value);
+    const error = r ? aceptarReto(r) : "No encuentro el código. Es algo como ANA-23.";
+    if (error) { $("codigo-msg").textContent = error; $("codigo-msg").hidden = false; return; }
+    $("retos").hidden = true;
+    volverInicio();
+  };
+
+  // ---------- Fondo de cada mundo ----------
+  const capa = (vel, alto, color, salto, forma) => {
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.moveTo(0, H);
+    const off = fondoX * vel;
+    if (forma === "picos") {
+      const o = off % salto;
+      for (let x = -salto; x <= W + salto; x += salto / 4) {
+        const k = Math.floor((x + off) / (salto / 4));
+        ctx.lineTo(x - o, H - alto - Math.sin(k * 1.7) * alto * 0.25 - Math.cos(k * 0.6) * alto * 0.2);
+      }
+    } else {
+      const f = forma === "dunas" ? 0.006 : 0.011;
+      for (let x = 0; x <= W + 8; x += 8) {
+        const u = (x + off) * f * (360 / salto);
+        ctx.lineTo(x, H - alto - Math.sin(u) * alto * 0.3 - Math.sin(u * 2.3 + 1) * alto * 0.12);
+      }
+    }
+    ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+  };
+  const aurora = () => {
+    const colores = ["rgba(74,222,128,0.16)", "rgba(45,212,191,0.13)", "rgba(167,139,250,0.13)"];
+    ctx.lineWidth = 34 * escala; ctx.lineCap = "round";
+    colores.forEach((c, i) => {
+      ctx.strokeStyle = c; ctx.beginPath();
+      for (let x = -20; x <= W + 20; x += 20) {
+        const y = H * (0.16 + i * 0.07) + Math.sin(x * 0.007 + reloj * 0.4 + i * 1.3) * H * 0.045;
+        x === -20 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    });
+  };
+  const rayos = () => {
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    for (let i = 0; i < 4; i++) {
+      const x = mod(i * W * 0.3 - fondoX * 0.08 + Math.sin(reloj * 0.3 + i) * 20, W + 200) - 100;
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 50, 0); ctx.lineTo(x + 170, H * 0.8); ctx.lineTo(x + 60, H * 0.8); ctx.closePath(); ctx.fill();
+    }
+  };
+  const particulas = (tipo) => {
+    for (const p of PARTICULAS) {
+      if (tipo === "luciernaga") {
+        const x = mod(p.x * W - fondoX * 0.3 * (0.5 + p.s), W), y = p.y * H * 0.8 + Math.sin(reloj + p.x * 10) * 10;
+        ctx.fillStyle = `rgba(253,230,138,${0.25 + 0.6 * Math.abs(Math.sin(reloj * 1.5 + p.s * 9))})`;
+        ctx.beginPath(); ctx.arc(x, y, 2, 0, TAU); ctx.fill();
+      } else if (tipo === "burbuja") {
+        const y = mod(p.y * H - reloj * 40 * (0.5 + p.s), H + 20), x = mod(p.x * W - fondoX * 0.25, W) + Math.sin(reloj * 2 + p.x * 9) * 6;
+        ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(x, y, 2 + p.s * 5, 0, TAU); ctx.stroke();
+      } else if (tipo === "arena") {
+        const x = mod(p.x * W - fondoX * (1.2 + p.s), W), y = p.y * H;
+        ctx.strokeStyle = "rgba(254,215,170,0.3)"; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 14, y); ctx.stroke();
+      } else {
+        const y = mod(p.y * H + reloj * 30 * (0.5 + p.s), H), x = mod(p.x * W - fondoX * 0.3 * p.s + Math.sin(reloj + p.y * 7) * 10, W);
+        ctx.fillStyle = "rgba(255,255,255,0.8)";
+        ctx.beginPath(); ctx.arc(x, y, 1.5 + p.s * 1.5, 0, TAU); ctx.fill();
+      }
+    }
+  };
+  const letrero = (m) => {
+    const p = 4 * escala, y0 = H * 0.6, total = led.ancho;
+    const off = (reloj * 55) / p, desfase = mod(off, 1) * p, cols = Math.ceil(W / p) + 1;
+    ctx.fillStyle = m.led; ctx.globalAlpha *= 0.55;
+    for (let c = 0; c < cols; c++) {
+      const col = Math.floor(mod(c + off, total)), x = c * p - desfase;
+      for (let f = 0; f < FILAS; f++) if (led.m[f * total + col]) ctx.fillRect(x, y0 + f * p, p * 0.72, p * 0.72);
+    }
+    ctx.globalAlpha /= 0.55;
+  };
+  const marcas = (m) => {
+    const tam = Math.round(Math.min(H * 0.11, W * 0.16));
+    ctx.font = `800 ${tam}px "Baloo 2", system-ui, sans-serif`; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    const d = fondoX * 0.35, tramo = W + tam * 16;
+    ctx.fillStyle = m.led; ctx.globalAlpha *= 0.13;
+    ctx.fillText(MARCAS[Math.floor(d / tramo) % MARCAS.length], W - mod(d, tramo), H * 0.36);
+    ctx.globalAlpha /= 0.13;
+  };
+  const fondo = (m) => {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, m.cielo[0]); g.addColorStop(0.55, m.cielo[1]); g.addColorStop(1, m.cielo[2]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    if (m.aurora) aurora();
+    if (m.astro) { const [c, x, y, r] = m.astro; ctx.fillStyle = c; ctx.beginPath(); ctx.arc(W * x, H * y, Math.min(W, H) * r, 0, TAU); ctx.fill(); }
+    if (m.rayos) rayos();
+    marcas(m);
+    capa(0.2, H * 0.28, m.lejos, 520, m.forma);
+    letrero(m);
+    if (!reducir) particulas(m.particula);
+    capa(0.45, H * 0.16, m.cerca, 360, m.forma);
+  };
+
+  // ---------- Obstáculos, bichos y flores ----------
+  const flor = (x, y, r, color, brillo) => {
+    if (brillo) { ctx.fillStyle = "rgba(255,240,200,0.25)"; ctx.beginPath(); ctx.arc(x, y, r * (2 + 0.3 * Math.sin(reloj * 5)), 0, TAU); ctx.fill(); }
+    ctx.fillStyle = color;
+    for (let i = 0; i < 5; i++) { const a = i * TAU / 5 + reloj * 0.6; ctx.beginPath(); ctx.ellipse(x + Math.cos(a) * r * 0.75, y + Math.sin(a) * r * 0.75, r * 0.6, r * 0.42, a, 0, TAU); ctx.fill(); }
+    ctx.fillStyle = "#ffe066"; ctx.beginPath(); ctx.arc(x, y, r * 0.42, 0, TAU); ctx.fill();
+  };
+  const cristal = (x, y, r, giro) => {
+    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3 * escala; ctx.lineCap = "round";
+    for (let i = 0; i < 6; i++) {
+      const a = giro + i * TAU / 6, cx = Math.cos(a), cy = Math.sin(a);
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + cx * r, y + cy * r); ctx.stroke();
+      const mx = x + cx * r * 0.6, my = y + cy * r * 0.6;
+      for (const s of [-1, 1]) { const b = a + s * 0.7; ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(mx + Math.cos(b) * r * 0.35, my + Math.sin(b) * r * 0.35); ctx.stroke(); }
+    }
+  };
+  // Tallo orgánico (liana, coral, cactus o hielo), nunca una columna recta.
+  const tallo = (cx, y0, y1, r, m, semilla) => {
+    const curva = (y) => Math.sin(y * 0.03 + semilla) * r * 0.28;
+    ctx.fillStyle = m.tallo[0];
+    for (let y = y0; y <= y1; y += 10) { ctx.beginPath(); ctx.arc(cx + curva(y), y, r, 0, TAU); ctx.fill(); }
+    ctx.fillStyle = m.tallo[1];
+    for (let y = y0; y <= y1; y += 10) { ctx.beginPath(); ctx.arc(cx + curva(y) - r * 0.28, y, r * 0.5, 0, TAU); ctx.fill(); }
+    ctx.fillStyle = m.adorno; ctx.strokeStyle = m.adorno; ctx.lineWidth = 2.5;
+    for (let y = y0 + 22; y < y1 - 8; y += 40) {
+      const x = cx + curva(y);
+      if (m.deco === "hoja") {
+        ctx.beginPath(); ctx.ellipse(x + r, y, 16, 7, -0.5, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x - r, y + 20, 16, 7, 0.5, 0, TAU); ctx.fill();
+      } else if (m.deco === "polipo") {
+        for (const s of [-1, 1]) { ctx.beginPath(); ctx.arc(x + s * r * 0.95, y + (s > 0 ? 0 : 18), 5, 0, TAU); ctx.fill(); }
+      } else if (m.deco === "espina") {
+        for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x + s * r * 0.9, y); ctx.lineTo(x + s * (r + 9), y - 5); ctx.stroke(); }
+      } else {
+        ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.moveTo(x - r * 0.3, y - 8); ctx.lineTo(x - r * 0.1, y); ctx.lineTo(x - r * 0.3, y + 8); ctx.lineTo(x - r * 0.5, y); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+      }
+    }
+  };
+  const letreroTallo = (cx, arriba, abajo, texto, color) => {
+    ctx.font = `800 ${Math.round(16 * escala)}px "Baloo 2", system-ui, sans-serif`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const largo = ctx.measureText(texto).width, sep = 40 * escala;
+    // En el tallo de arriba si cabe; si no, en el de abajo. Nunca dentro del hueco.
+    let y = arriba - sep - largo / 2;
+    if (y - largo / 2 < 8) y = abajo + sep + largo / 2;
+    ctx.save(); ctx.translate(cx, y); ctx.rotate(-Math.PI / 2);
+    ctx.globalAlpha = 0.75; ctx.fillStyle = color; ctx.fillText(texto, 0, 1);
+    ctx.restore();
+  };
+  let carteles = 0;
+  const ANCHO = () => 64 * escala;
+  const huecoDe = (o) => {
+    const c = o.mueve ? o.base + Math.sin(reloj * 1.6 + o.fase) * 46 * escala : o.base;
+    const h = 215 * escala;
+    return [c - h / 2, c + h / 2];
+  };
+  const dibujarPar = (o) => {
+    const m = MUNDOS[o.mundo], a = ANCHO(), r = a * 0.42, cx = o.x + a / 2;
+    const [arriba, abajo] = huecoDe(o);
+    tallo(cx, -20, arriba - r * 0.6, r, m, o.fase);
+    tallo(cx, abajo + r * 0.6, H + 20, r, m, o.fase + 2);
+    for (const y of [arriba, abajo]) m.deco === "brillo" ? cristal(cx, y, 13 * escala, 0.3) : flor(cx, y, 11 * escala, m.punta, false);
+    if (o.cartel) letreroTallo(cx, arriba, abajo, o.cartel, m.led);
+  };
+  const posBicho = (o) => [o.x, o.base + Math.sin(reloj * 2.2 + o.fase) * H * 0.17];
+  const dibujarBicho = (o) => {
+    const [x, y] = posBicho(o), s = escala;
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    if (o.tipo === "abeja") {
+      const ala = reducir ? 0.6 : Math.abs(Math.sin(reloj * 40));
+      ctx.fillStyle = "rgba(255,255,255,0.7)";
+      ctx.beginPath(); ctx.ellipse(-2, -12, 7, 4 + 8 * ala, -0.3, 0, TAU); ctx.fill();
+      ctx.fillStyle = "#f5b82e"; ctx.beginPath(); ctx.ellipse(0, 0, 16, 11, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = "#23122f";
+      for (const dx of [-6, 3]) ctx.fillRect(dx, -10, 4, 20);
+      ctx.beginPath(); ctx.moveTo(-16, 0); ctx.lineTo(-23, -3); ctx.lineTo(-23, 3); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.arc(-11, -3, 2, 0, TAU); ctx.fill();
+    } else if (o.tipo === "medusa") {
+      ctx.strokeStyle = "rgba(255,180,220,0.7)"; ctx.lineWidth = 2.5;
+      for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(i * 5, 4); for (let k = 1; k <= 5; k++) ctx.lineTo(i * 5 + Math.sin(reloj * 4 + k + i) * 4, 4 + k * 6); ctx.stroke(); }
+      ctx.fillStyle = "rgba(255,150,200,0.85)"; ctx.beginPath(); ctx.arc(0, 4, 16, Math.PI, 0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.5)"; ctx.beginPath(); ctx.arc(-5, -3, 4, 0, TAU); ctx.fill();
+    } else {
+      ctx.scale(1 / s, 1 / s); cristal(0, 0, 18 * s, reloj * 1.5);
+    }
+    ctx.restore();
+  };
+
+  const posBurbuja = (o) => [o.x, o.base + Math.sin(reloj * 1.8 + o.fase) * 18 * escala];
+  const dibujarBurbuja = (o) => {
+    const [x, y] = posBurbuja(o), r = 24 * escala;
+    ctx.fillStyle = "rgba(125,249,255,0.18)"; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255,0.7)"; ctx.beginPath(); ctx.ellipse(x - r * 0.4, y - r * 0.45, r * 0.22, r * 0.12, -0.6, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#fff6e8"; ctx.font = `800 ${Math.round(28 * escala)}px "Baloo 2", system-ui, sans-serif`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("?", x, y + 2 * escala);
+  };
+  // Hoja grande que atrapa al colibrí cuando gasta una vida.
+  const hoja = (r) => {
+    ctx.save(); ctx.globalAlpha = Math.min(1, r.vida * 1.5); ctx.translate(r.x, r.y); ctx.scale(escala, escala);
+    ctx.fillStyle = "#3f9a5f"; ctx.beginPath(); ctx.ellipse(0, 0, 52, 15, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = "#1f5f45"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-48, 0); ctx.lineTo(50, 0); ctx.stroke();
+    ctx.lineWidth = 2;
+    for (let i = -3; i <= 3; i++) { ctx.beginPath(); ctx.moveTo(i * 12, 0); ctx.lineTo(i * 12 + 10, -9); ctx.moveTo(i * 12, 0); ctx.lineTo(i * 12 + 10, 9); ctx.stroke(); }
+    ctx.restore();
+  };
+
+  const colibri = (x, y, v) => {
+    const ang = Math.max(-0.5, Math.min(0.7, v / 900));
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(escala, escala);
+    // brilla mientras dura el escudo de la vitamina
+    if (escudo > 0) {
+      ctx.globalAlpha = 0.45 + 0.55 * Math.abs(Math.sin(t * 14));
+      ctx.fillStyle = "rgba(255,159,28,0.35)";
+      ctx.beginPath(); ctx.arc(4, 0, 34, 0, TAU); ctx.fill();
+    }
+    // ala: bate rápido al flotar y se abre al planear
+    const planea = estado === "vuelo" && !pulsado && guia <= 0;
+    const a = reducir ? 0.5 : planea ? 0.35 + 0.1 * Math.sin(t * 6) : Math.abs(Math.sin(reloj * 38));
+    ctx.fillStyle = "rgba(190,255,235,0.75)";
+    ctx.beginPath(); ctx.ellipse(-4, -10, 8, 22 * a + 4, planea ? -1.1 : -0.6, 0, TAU); ctx.fill();
+    // cuerpo
+    ctx.fillStyle = "#2fd3a0"; ctx.beginPath(); ctx.ellipse(0, 0, 20, 12, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#e8365d"; ctx.beginPath(); ctx.ellipse(8, 4, 8, 6, 0, 0, TAU); ctx.fill();
+    // cola
+    ctx.fillStyle = "#1a8f6d"; ctx.beginPath(); ctx.moveTo(-18, -2); ctx.lineTo(-34, -8); ctx.lineTo(-32, 6); ctx.closePath(); ctx.fill();
+    // ojo y pico
+    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(11, -4, 4, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#23122f"; ctx.beginPath(); ctx.arc(12, -4, 2, 0, TAU); ctx.fill();
+    ctx.strokeStyle = "#23122f"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(19, -1); ctx.lineTo(40, 1); ctx.stroke();
+    ctx.restore();
+  };
+
+  const crearPar = () => {
+    const mueve = pares >= 3 && Math.random() < 0.35;
+    const base = mueve ? H * 0.32 + Math.random() * H * 0.36 : H * 0.24 + Math.random() * H * 0.52;
+    cosas.push({ tipo: "par", x: W + 40, base, mueve, fase: Math.random() * TAU, mundo: Math.floor(pares / CADA_MUNDO) % MUNDOS.length, pasada: false, roce: Infinity,
+      cartel: pares % 3 === 2 ? CARTELES[carteles++ % CARTELES.length] : null });
+    pares++;
+  };
+  const crearMedio = () => {
+    const m = MUNDOS[Math.floor(Math.max(0, pares - 1) / CADA_MUNDO) % MUNDOS.length];
+    if (pares >= proximaBurbuja) {
+      proximaBurbuja += CADA_BURBUJA;
+      cosas.push({ tipo: "burbuja", x: W + 40, base: H * 0.3 + Math.random() * H * 0.4, fase: Math.random() * TAU });
+      return;
+    }
+    if (pares >= 4 && Math.random() < 0.35) cosas.push({ tipo: m.bicho, x: W + 40, base: H * 0.5, fase: Math.random() * TAU });
+    else if (Math.random() < 0.8) cosas.push({ tipo: "flor", x: W + 40, base: H * 0.25 + Math.random() * H * 0.5, mundo: MUNDOS.indexOf(m) });
+  };
+  const beber = (o) => {
+    o.bebida = true; flores++; nectar++;
+    // Flores seguidas (menos de 2,6 s entre una y otra) suben el combo: x2, x3… hasta x5.
+    combo = t - ultimaFlor < 2.6 ? Math.min(5, combo + 1) : 1; ultimaFlor = t;
+    const gana = 1 + combo; puntos += gana;
+    flotante(o.x, o.base - 22 * escala, combo > 1 ? `+${gana}  x${combo}` : `+${gana}`, combo > 1 ? "#ff9fd0" : "#ffe066");
+    SON.nectar(combo);
+    for (let i = 0; i < 10; i++) chispas.push({ x: o.x, y: o.base, vx: (Math.random() - 0.5) * 220, vy: (Math.random() - 0.5) * 220, vida: 0.6 });
+    if (nectar >= FLORES_VIT) {
+      nectar = 0;
+      if (vitaminas < VIT_MAX) { vitaminas++; cartel("¡+1 vitamina!", "5 flores de néctar. Te salvará en el próximo choque.", 2.5); }
+    }
+    pintarMarcador();
+  };
+
+  const bucle = (ahora) => {
+    const real = Math.min(0.033, (ahora - ultimo) / 1000 || 0);
+    ultimo = ahora;
+    reloj += real;
+    const dt = estado === "vuelo" ? real : 0;
+    const objetivoX = Math.min(W * 0.28, 140);
+
+    if (estado === "inicio") {
+      fondoX += real * 30;
+      ave.x = W / 2 - 45 * escala; ave.y = H * 0.47 + Math.sin(reloj * 3) * 4 * escala; ave.v = 0;
+    }
+    if (estado === "listo") { ave.y = yListo + Math.sin(reloj * 3) * 10; }
+    if (estado === "vuelo") {
+      t += dt; fondoX += dt * 190;
+      escudo = Math.max(0, escudo - dt);
+      ave.x += (objetivoX - ave.x) * Math.min(1, dt * 4);
+      if (guia > 0) {
+        guia -= dt;
+        if (guia <= 0) $("guia").hidden = true;
+      }
+      if (guia > 0 && !tocado) {
+        // Durante la guía, el colibrí espera flotando hasta el primer toque.
+        ave.v = 0; ave.y += (H * 0.45 - ave.y) * Math.min(1, dt * 3) + Math.sin(reloj * 3) * 0.3;
+      } else if (pulsado) {
+        ave.v = Math.max(V_SUBIDA * escala, ave.v - SUBIR * escala * dt);
+      } else {
+        ave.v = Math.min(V_BAJADA * escala, ave.v + GRAV * escala * dt);
+      }
+      ave.y += ave.v * dt;
+
+      if (t >= proximo) { crearPar(); proximo = t + 1.75; medio = t + 0.875; medioHecho = false; }
+      if (!medioHecho && t >= medio) { medioHecho = true; crearMedio(); }
+
+      const nivel = Math.floor(pasadas / CADA_MUNDO);
+      const vel = 190 * escala * 1.15 * (1 + Math.min(0.3, nivel * 0.06));
+      const a = ANCHO();
+      for (const o of cosas) {
+        o.x -= vel * (o.tipo === "abeja" || o.tipo === "medusa" || o.tipo === "copo" ? 1.3 : 1) * dt;
+        if (o.tipo === "par") {
+          if (!o.pasada && o.x + a < ave.x - 18) {
+            o.pasada = true; pasadas++; puntos++; SON.pasar();
+            // Pasar casi rozando da un punto extra.
+            if (o.roce >= 0 && o.roce < 14 * escala) { puntos++; rozados++; flotante(ave.x, ave.y - 36 * escala, "¡Rozando! +1", "#7df9ff"); SON.rozar(); vibrar(15); }
+            pintarMarcador();
+            if (pasadas % CADA_MUNDO === 0) {
+              mundoAntes = mundo; mundo = (pasadas / CADA_MUNDO) % MUNDOS.length; mezcla = 0;
+              const nuevo = ganarCromo(CROMO_MUNDO[mundo]);
+              cartel(`Mundo ${pasadas / CADA_MUNDO + 1}: ${MUNDOS[mundo].nombre}`, (nuevo ? "🃏 ¡Cromo nuevo! " : "") + MUNDOS[mundo].dato);
+              SON.mundo();
+            }
+          }
+          const [arriba, abajo] = huecoDe(o);
+          const dentroX = ave.x + 18 * escala > o.x + 4 && ave.x - 18 * escala < o.x + a - 4;
+          if (dentroX && escudo <= 0) o.roce = Math.min(o.roce, ave.y - 11 * escala - arriba, abajo - ave.y - 11 * escala);
+          if (dentroX && (ave.y - 11 * escala < arriba || ave.y + 11 * escala > abajo)) chocar();
+        } else if (o.tipo === "flor") {
+          if (!o.bebida && Math.hypot(ave.x + 22 * escala - o.x, ave.y - o.base) < 30 * escala) beber(o);
+        } else if (o.tipo === "burbuja") {
+          const [bx, by] = posBurbuja(o);
+          if (!o.bebida && estado === "vuelo" && Math.hypot(ave.x - bx, ave.y - by) < 34 * escala) atraparBurbuja(o);
+        } else {
+          const [bx, by] = posBicho(o);
+          if (Math.hypot(ave.x - bx, ave.y - by) < 24 * escala) chocar();
+        }
+      }
+      cosas = cosas.filter((o) => o.x > -120 && !o.bebida);
+      if (ave.y > H - 10 || ave.y < -30) chocar();
+      // Con escudo, el borde de la pantalla no deja escapar al colibrí.
+      if (escudo > 0) { if (ave.y > H - 20) { ave.y = H - 20; ave.v = Math.min(0, ave.v); } if (ave.y < 10) { ave.y = 10; ave.v = Math.max(0, ave.v); } }
+      mezcla = Math.min(1, mezcla + dt / 1.5);
+      if (pulsado && !reducir) estela.push({ x: ave.x - 12 * escala, y: ave.y + 6 * escala, vida: 0.35 });
+    }
+    zumbar(estado === "vuelo" && pulsado && sonido);
+    for (const e of estela) { e.x -= 160 * escala * real; e.vida -= real; }
+    estela = estela.filter((e) => e.vida > 0);
+    for (const x of textos) { x.y -= 55 * real; x.vida -= real; }
+    textos = textos.filter((x) => x.vida > 0);
+    if (rescate) { rescate.vida -= dt / 0.9; if (rescate.vida <= 0) rescate = null; }
+    for (const c of chispas) { c.x += c.vx * real; c.y += c.vy * real; c.vida -= real; }
+    chispas = chispas.filter((c) => c.vida > 0);
+
+    // Dibujo (con temblor al chocar)
+    ctx.save();
+    if (temblor > 0) { ctx.translate((Math.random() - 0.5) * temblor, (Math.random() - 0.5) * temblor); temblor = Math.max(0, temblor - real * 45); }
+    fondo(MUNDOS[mezcla < 1 ? mundoAntes : mundo]);
+    if (mezcla < 1) { ctx.globalAlpha = mezcla; fondo(MUNDOS[mundo]); ctx.globalAlpha = 1; }
+    if (estado === "inicio") {
+      // Flor del inicio, con su tallo, junto al pico del colibrí
+      const fx = ave.x + 58 * escala, fy = H * 0.47 + 2;
+      ctx.strokeStyle = "#2f7a52"; ctx.lineWidth = 5 * escala;
+      ctx.beginPath(); ctx.moveTo(fx, fy); ctx.quadraticCurveTo(fx + 20 * escala, fy + 70 * escala, fx - 4, fy + 130 * escala); ctx.stroke();
+      ctx.fillStyle = "#3f9a5f"; ctx.beginPath(); ctx.ellipse(fx + 14 * escala, fy + 70 * escala, 16 * escala, 7 * escala, -0.5, 0, TAU); ctx.fill();
+      flor(fx, fy, 15 * escala, "#ff5fa2", true);
+    }
+    for (const o of cosas) {
+      if (o.tipo === "par") dibujarPar(o);
+      else if (o.tipo === "flor") flor(o.x, o.base, 13 * escala, MUNDOS[o.mundo].punta, true);
+      else if (o.tipo === "burbuja") dibujarBurbuja(o);
+      else dibujarBicho(o);
+    }
+    ctx.fillStyle = "#ffe066";
+    for (const c of chispas) { ctx.globalAlpha = c.vida / 0.6; ctx.beginPath(); ctx.arc(c.x, c.y, 3, 0, TAU); ctx.fill(); }
+    ctx.globalAlpha = 1;
+    if (rescate) hoja(rescate);
+    ctx.fillStyle = "#2fd3a0";
+    for (const e of estela) { ctx.globalAlpha = (e.vida / 0.35) * 0.55; ctx.beginPath(); ctx.arc(e.x, e.y, 3.2 * escala * (e.vida / 0.35 + 0.3), 0, TAU); ctx.fill(); }
+    ctx.globalAlpha = 1;
+    colibri(ave.x, ave.y, ave.v);
+    ctx.font = `800 ${Math.round(24 * escala)}px "Baloo 2", system-ui, sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.lineWidth = 5; ctx.strokeStyle = "#23122f"; ctx.lineJoin = "round";
+    for (const x of textos) { ctx.globalAlpha = Math.min(1, x.vida / 0.4); ctx.strokeText(x.txt, x.x, x.y); ctx.fillStyle = x.color; ctx.fillText(x.txt, x.x, x.y); }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    // destello del choque
+    if (choque > 0) { ctx.fillStyle = `rgba(255,246,232,${choque})`; ctx.fillRect(0, 0, W, H); choque = Math.max(0, choque - 0.02); }
+    requestAnimationFrame(bucle);
+  };
+  // Un reto que llega en el enlace (#reto=ANA-23) se acepta solo.
+  const delEnlace = leerCodigo(decodeURIComponent(location.hash + " " + location.search));
+  if (delEnlace) aceptarReto(delEnlace);
+  pintarReto();
+  if (PLATAFORMA === "crazygames" && window.CrazyGames) {
+    window.CrazyGames.SDK.init().then(() => {
+      const sdk = CG(); if (!sdk) return;
+      const r = leerCodigo(sdk.game.getInviteParam("reto") || "");
+      if (r) aceptarReto(r);
+    }).catch(() => {});
+  }
+  requestAnimationFrame((a) => { ultimo = a; bucle(a); });
+})();
+</script>
+
+</html>
