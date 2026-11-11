@@ -60,6 +60,10 @@
   .etiqueta { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; color: #7a2f4f; }
   .etiqueta.vit { color: #c2410c; }
   .del-video { font-size: 14px; line-height: 1.35; opacity: 0.75; }
+  .firma { font-size: 14px; letter-spacing: 0.5px; color: var(--papel); text-shadow: 0 2px 0 var(--tinta); opacity: 0.9; }
+  .firma b, .firma-fin b { color: #2fd3a0; }
+  .firma-fin { font-size: 14px; line-height: 1.35; opacity: 0.8; }
+  .firma-fin b { color: #13805f; }
   .opciones { display: grid; gap: 10px; }
   button, .enlace { font-family: var(--display); font-weight: 800; font-size: 22px; border: 0; border-radius: 14px; padding: 13px 12px; cursor: pointer; color: #fff; box-shadow: 0 5px 0 var(--tinta); line-height: 1.15; text-decoration: none; display: block; }
   button:active, .enlace:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--tinta); }
@@ -151,6 +155,7 @@
       <button class="b-compartir b-claro" id="b-te-retaron">¿Te retaron?</button>
       <button class="b-compartir b-claro" id="quitar-reto" hidden>Jugar sin reto</button>
     </div>
+    <span class="firma">by <b>Pangea24</b> · animales, cuerpo humano y ciencia</span>
   </div>
 </div>
 
@@ -162,6 +167,7 @@
     <div class="opciones" id="opciones"></div>
     <button class="b-compartir" id="pista">Pista: quita una respuesta mala (−3 puntos)</button>
     <div class="resultado" id="explica" hidden></div>
+    <a class="b-compartir" id="mas-pangea" target="_blank" rel="noopener" hidden></a>
     <button class="b-jugar" id="seguir" hidden>Seguir volando</button>
   </div>
 </div>
@@ -176,6 +182,7 @@
     <button class="b-jugar" id="compartir">Reta a un amigo</button>
     <button class="b-jugar" id="anuncio" hidden>📺 Mira un anuncio y sigue volando</button>
     <button class="b-compartir" id="menu">Menú</button>
+    <span class="firma-fin">Colibrí · un juego de <b>Pangea24</b>. Síguenos en YouTube, Facebook, Instagram y TikTok.</span>
   </div>
 </div>
 
@@ -197,7 +204,7 @@
   <div class="tarjeta">
     <span class="etiqueta">Álbum de Pangea</span>
     <h2 id="album-titulo">Tus cromos</h2>
-    <p class="nota">Acierta preguntas de cada vídeo y cruza los mundos para completarlo.</p>
+    <p class="nota">Acierta preguntas de cada tema y cruza los mundos para completarlo.</p>
     <div class="cromos" id="cromos"></div>
     <button class="b-jugar" id="cerrar-album">Cerrar</button>
   </div>
@@ -227,7 +234,7 @@
 
 <script>
 (() => {
-  // Vídeos de Pangea24 ya publicados en YouTube. Las preguntas salen solo de lo que dice su guion.
+  // Vídeos de Pangea24 ya publicados en YouTube. Una pregunta que toca su tema lleva su clave y enseña «Míralo aquí».
   const VIDEOS = {
     mar: ["El mar más salado del mundo se está secando, y el suelo cede", "https://youtu.be/EFUPUh27i4Q"],
     taxi: ["Los taxistas de Londres tienen el cerebro distinto, y se lo fabricaron", "https://youtu.be/TBwkoHOnjgw"],
@@ -238,30 +245,148 @@
     vago: ["Nervio vago: qué hace de verdad (y qué es mentira de «activarlo»)", "https://youtu.be/bsx1LoDqcQo"],
     cornea: ["Tu ojo respira del aire: la córnea no tiene ni una gota de sangre", "https://youtu.be/LQ0RpswrdoI"],
   };
-  // [vídeo, pregunta, respuesta buena, otra, otra, explicación]
+  const CANAL = "https://www.youtube.com/@pangea2407";
+  // Temas de las preguntas: cada uno da un cromo del álbum.
+  const TEMAS = {
+    animales: ["🐾", "Animales"], cuerpo: ["🫀", "Cuerpo humano"], planeta: ["🌍", "Planeta Tierra"],
+    mundo: ["🗺️", "Geografía"], espacio: ["🪐", "Espacio"], ciencia: ["🔬", "Ciencia de cada día"],
+  };
+  // Cultura general que casi todo el mundo sabe, con datos comprobados.
+  // [tema, pregunta, respuesta buena, otra, otra, explicación, vídeo de Pangea24 si hay uno del tema]
   const PREGUNTAS = [
-    ["mar", "¿Cuánta sal tiene el agua del mar Muerto?", "Alrededor del 34 %", "Algo más del 3 %", "Alrededor del 70 %", "Un 34 %. El océano tiene algo más del 3,5 %. Por eso flotas sin esfuerzo."],
-    ["mar", "¿Cuánto baja hoy el nivel del mar Muerto?", "Cerca de un metro al año", "Un centímetro al año", "Diez metros al año", "En torno a un metro al año. Desde los años sesenta ha bajado más de 25 metros."],
-    ["mar", "¿Qué abre los socavones en la orilla del mar Muerto?", "Agua dulce que disuelve sal enterrada", "Terremotos", "Volcanes bajo el agua", "El agua dulce disuelve capas de sal bajo el suelo, se forman huecos y el techo se hunde de golpe."],
-    ["taxi", "¿Qué parte del cerebro tienen más grande los taxistas de Londres?", "La parte de atrás del hipocampo", "El cerebelo", "La parte de delante del hipocampo", "La parte de atrás del hipocampo, la de los mapas mentales. La de delante, en cambio, era más pequeña."],
-    ["taxi", "¿Cuántas calles memorizan para el examen The Knowledge?", "Unas 25.000", "Unas 2.500", "Unas 250.000", "Unas 25.000 calles, sin GPS ni mapa. El aprendizaje dura de dos a cuatro años."],
-    ["medusa", "¿Cuánto mide la campana de la medusa que vuelve a ser bebé?", "Unos 4 o 5 milímetros", "Unos 4 o 5 centímetros", "Medio metro", "Unos 4 o 5 milímetros: el tamaño de una lenteja grande."],
-    ["medusa", "Cuando está a punto de morir, ¿en qué se convierte esta medusa?", "En pólipo, su primera etapa", "En un huevo", "En una piedra", "Se encoge, pierde los tentáculos, se pega al fondo y de ahí crece una colonia de pólipos."],
-    ["medusa", "¿Cómo se cree que esta medusa viajó por todo el mundo?", "En el agua de lastre de los barcos", "Pegada a las ballenas", "En las corrientes de un huracán", "Es la hipótesis más citada: los barcos cargan agua en un puerto y la vacían en otro."],
-    ["hioides", "¿A cuántos huesos está unido el hioides?", "A ninguno", "Solo a la mandíbula", "A la columna", "A ninguno. Cuelga de músculos y ligamentos, como una hamaca, y te ayuda a tragar y a hablar."],
-    ["hioides", "En los estrangulamientos que se estudiaron en 1996, ¿cuántas veces estaba roto el hioides?", "Uno de cada tres", "Siempre", "Nueve de cada diez", "Uno de cada tres. Por eso un hioides entero no descarta nada."],
-    ["tardi", "¿Qué temperatura mata a la mitad de los tardígrados despiertos en un día?", "Unos 37 °C, la de tu cuerpo", "100 °C", "20 °C bajo cero", "Unos 37 °C bastan si está despierto. Seco, en «tonel», aguanta mucho más."],
-    ["tardi", "¿Cómo se le llama también al tardígrado?", "Oso de agua", "Pulga de mar", "Gusano de hielo", "Oso de agua: mide medio milímetro, tiene ocho patas y camina despacio."],
-    ["tardi", "En 2007, ¿cuántos días pasaron los tardígrados al vacío del espacio?", "Diez días", "Un año", "Una hora", "Diez días fuera de la nave. Al volver, muchos revivieron."],
-    ["madres", "¿Qué tamaño tiene una cría de canguro rojo al nacer?", "Como una gominola, unos 2 cm", "Como un gato", "Como un huevo de gallina", "Unos 2 centímetros, ciega y sin pelo. Aun así trepa sola hasta la bolsa."],
-    ["madres", "¿Cuánto dura el embarazo del canguro rojo?", "Unos 33 días", "Nueve meses", "Un año y medio", "Apenas 33 días. Lo demás lo hace la cría dentro de la bolsa."],
-    ["madres", "¿Cuántos hijos a la vez puede tener una madre canguro?", "Tres, en tres fases distintas", "Solo uno", "Diez", "Tres: uno que ya camina, otro en la bolsa y un embrión en pausa en el útero."],
-    ["vago", "¿Cómo se le ocurrió a Otto Loewi el experimento del nervio vago?", "En un sueño", "Leyendo un libro", "Viendo a su gato", "En un sueño, la noche de Pascua de 1921. Le dio el Premio Nobel en 1936."],
-    ["vago", "¿Qué significa «vago» en el nombre del nervio vago?", "Errante, el que vagabundea", "Perezoso", "Pequeño", "Viene del latín: errante. Es el nervio que más lejos llega de los que nacen en la cabeza."],
-    ["vago", "¿Por qué a algunas personas les da tos al limpiarse el oído?", "Una rama del nervio vago llega al oído", "Por la cera", "Porque el oído toca los pulmones", "Una fibra del nervio vago llega a la piel del oído. Se llama reflejo de Arnold."],
-    ["cornea", "¿De dónde saca el oxígeno la córnea de tu ojo?", "Del aire, a través de las lágrimas", "De sus venas", "De la nariz", "Del aire, disuelto en tus lágrimas. No tiene ni un vaso sanguíneo."],
-    ["cornea", "Según los oculistas, ¿qué no debes hacer nunca?", "Dormir con lentes de contacto", "Parpadear mucho", "Mirar el cielo", "Dormir con lentes tapa la única ventana de la córnea: se queda sin aire y sube el riesgo de infección."],
-    ["cornea", "¿Cuántos trasplantes de córnea se hacen hoy al año?", "Más de 180.000", "Unos 100", "Unos 10 millones", "Más de 180.000. Como no tiene sangre, se trasplanta mejor que casi cualquier otro órgano."],
+    ["animales", "¿Cuál es el animal más grande que ha existido?", "La ballena azul", "El elefante africano", "El tiburón ballena", "La ballena azul: puede pasar de 30 metros, más que cualquier dinosaurio conocido."],
+    ["animales", "¿Cuál es el animal terrestre más rápido?", "El guepardo", "El león", "El caballo", "El guepardo: en carreras cortas llega a unos 100 km/h."],
+    ["animales", "¿Cuántas patas tiene una araña?", "Ocho", "Seis", "Diez", "Ocho. Por eso la araña no es un insecto: los insectos tienen seis."],
+    ["animales", "¿Cuántas patas tiene un insecto?", "Seis", "Ocho", "Cuatro", "Seis, y el cuerpo en tres partes: cabeza, tórax y abdomen."],
+    ["animales", "¿Cuál de estos animales es un mamífero?", "El delfín", "El tiburón", "El pulpo", "El delfín: respira aire con pulmones y alimenta a sus crías con leche."],
+    ["animales", "¿Cómo respiran los peces?", "Con branquias", "Con pulmones", "Por las aletas", "Con branquias, que sacan el oxígeno disuelto en el agua."],
+    ["animales", "¿Qué come casi siempre el oso panda?", "Bambú", "Pescado", "Miel", "Bambú. Se pasa buena parte del día comiéndolo."],
+    ["animales", "¿Cuántos corazones tiene un pulpo?", "Tres", "Uno", "Dos", "Tres: dos mueven la sangre por las branquias y uno por el resto del cuerpo."],
+    ["animales", "¿Cuántos brazos tiene un pulpo?", "Ocho", "Seis", "Diez", "Ocho brazos llenos de ventosas. El calamar tiene diez."],
+    ["animales", "¿Qué mamífero pone huevos?", "El ornitorrinco", "El murciélago", "El canguro", "El ornitorrinco, de Australia: uno de los poquísimos mamíferos que ponen huevos."],
+    ["animales", "¿Dónde lleva la mamá canguro a su cría?", "En una bolsa en la barriga", "Sobre la espalda", "En la boca", "En la bolsa. Al nacer, la cría mide unos 2 cm, como una gominola.", "madres"],
+    ["animales", "¿Cuál es el ave más grande del mundo?", "El avestruz", "El águila real", "El pingüino emperador", "El avestruz: puede medir unos 2,5 metros. No vuela, pero corre muchísimo."],
+    ["animales", "¿Qué ave puede volar hacia atrás?", "El colibrí", "La gallina", "La paloma", "El colibrí, el de este juego. También se queda quieto en el aire."],
+    ["animales", "¿Qué animal cambia el color de su piel?", "El camaleón", "La jirafa", "La cebra", "El camaleón. Cambia de color con la luz, el calor o su estado de ánimo."],
+    ["animales", "¿Cómo se llama la cría del caballo?", "Potro", "Ternero", "Cordero", "Potro. El ternero es la cría de la vaca y el cordero, la de la oveja."],
+    ["animales", "¿Qué animal tiene el cuello más largo?", "La jirafa", "El avestruz", "El camello", "La jirafa. Tiene siete vértebras en el cuello, igual que tú, pero enormes."],
+    ["animales", "¿Qué es una ballena?", "Un mamífero", "Un pez", "Un reptil", "Un mamífero: sale a respirar aire y amamanta a sus crías."],
+    ["animales", "¿Qué hacen las abejas con el néctar de las flores?", "Miel", "Leche", "Seda", "Miel. Y al ir de flor en flor llevan el polen que hace nacer la fruta."],
+    ["animales", "¿Qué mamífero puede volar de verdad?", "El murciélago", "La ardilla voladora", "El pingüino", "El murciélago. La ardilla voladora solo planea."],
+    ["animales", "¿Qué animal puede vivir más de 100 años?", "La tortuga gigante", "El perro", "La gallina", "Las tortugas gigantes de Galápagos pueden pasar de los 100 años."],
+    ["animales", "¿Qué animal diminuto llaman «oso de agua»?", "El tardígrado", "La nutria", "El castor", "El tardígrado: mide medio milímetro, tiene ocho patas y es casi indestructible.", "tardi"],
+    ["animales", "Hay una medusa que puede volver a ser joven. ¿Cómo la llaman?", "La medusa inmortal", "La medusa gigante", "La medusa de fuego", "La medusa inmortal: cuando va a morir, vuelve a su primera etapa de vida.", "medusa"],
+    ["animales", "¿Los murciélagos son ciegos?", "No, casi todos ven", "Sí, todos", "Solo de día", "No. Casi todos ven, y muchos además se orientan con el eco de sus chillidos."],
+    ["animales", "¿Qué tienen los tiburones en lugar de huesos?", "Cartílago", "Conchas", "Nada, son blandos", "Cartílago, el mismo material de tu nariz y tus orejas."],
+    ["animales", "¿Cuántas jorobas tiene un dromedario?", "Una", "Dos", "Tres", "Una. El camello bactriano tiene dos. Y guardan grasa, no agua."],
+    ["animales", "¿Qué animal es famoso por dormir colgado boca abajo?", "El murciélago", "El búho", "El koala", "El murciélago: duerme colgado de las patas, cabeza abajo."],
+
+    ["cuerpo", "¿Cuántos huesos tiene un adulto?", "Unos 206", "Unos 100", "Unos 500", "Unos 206. Un bebé nace con más, pero muchos se van soldando al crecer."],
+    ["cuerpo", "¿Cuál es el órgano más grande del cuerpo?", "La piel", "El hígado", "El cerebro", "La piel: en un adulto cubre casi dos metros cuadrados."],
+    ["cuerpo", "¿Qué órgano bombea la sangre?", "El corazón", "Los pulmones", "El estómago", "El corazón: late unas 100.000 veces al día."],
+    ["cuerpo", "¿Cuál es el hueso más largo del cuerpo?", "El fémur", "El húmero", "La tibia", "El fémur, el hueso del muslo."],
+    ["cuerpo", "¿Dónde está el hueso más pequeño del cuerpo?", "En el oído", "En el dedo meñique", "En la nariz", "En el oído: el estribo mide unos 3 milímetros."],
+    ["cuerpo", "¿Cuántos dientes tiene un adulto, contando las muelas del juicio?", "32", "20", "42", "32. Los niños tienen 20 dientes de leche."],
+    ["cuerpo", "¿Qué gas necesitamos respirar para vivir?", "Oxígeno", "Dióxido de carbono", "Helio", "Oxígeno. Al soltar el aire echamos dióxido de carbono."],
+    ["cuerpo", "¿Cuántos pulmones tenemos?", "Dos", "Uno", "Cuatro", "Dos, y el izquierdo es algo más pequeño para dejar sitio al corazón."],
+    ["cuerpo", "¿Qué parte del ojo no tiene sangre y toma el oxígeno del aire?", "La córnea", "La pupila", "La pestaña", "La córnea: toma el oxígeno del aire disuelto en tus lágrimas.", "cornea"],
+    ["cuerpo", "¿Qué hueso del cuello no está unido a ningún otro hueso?", "El hioides", "La clavícula", "La rótula", "El hioides: cuelga de músculos, como una hamaca, y te ayuda a tragar.", "hioides"],
+    ["cuerpo", "¿Qué nervio baja del cerebro hasta la barriga y ayuda a calmar el corazón?", "El nervio vago", "El nervio óptico", "El nervio ciático", "El nervio vago: el que más lejos llega de los que salen de la cabeza.", "vago"],
+    ["cuerpo", "¿Qué parte del cerebro es clave para la memoria y para orientarse?", "El hipocampo", "El cerebelo", "La médula", "El hipocampo. A los taxistas de Londres se les agranda de tanto memorizar calles.", "taxi"],
+    ["cuerpo", "¿De qué color es la sangre dentro de las venas?", "Roja", "Azul", "Verde", "Siempre roja. Las venas se ven azuladas por cómo la piel deja pasar la luz."],
+    ["cuerpo", "¿Cuánta sangre tiene un adulto?", "Unos 5 litros", "Unos 20 litros", "Medio litro", "Unos 5 litros, que dan la vuelta a todo el cuerpo en más o menos un minuto."],
+    ["cuerpo", "¿Qué vitamina fabrica tu piel con la luz del sol?", "La vitamina D", "La vitamina C", "La vitamina A", "La vitamina D, que ayuda a tener los huesos fuertes."],
+    ["cuerpo", "¿Qué órganos limpian la sangre y fabrican la orina?", "Los riñones", "Los pulmones", "El corazón", "Los riñones: filtran toda tu sangre muchas veces al día."],
+    ["cuerpo", "¿Qué órgano tiene ácido para deshacer la comida?", "El estómago", "El corazón", "Los pulmones", "El estómago. Una capa de moco lo protege de su propio ácido."],
+    ["cuerpo", "¿Cuántos sentidos nos enseñan en la escuela?", "Cinco", "Tres", "Diez", "Cinco: vista, oído, olfato, gusto y tacto. En realidad hay más, como el equilibrio."],
+    ["cuerpo", "¿Qué parte del cuerpo te ayuda a mantener el equilibrio?", "El oído interno", "La nariz", "Las uñas", "El oído interno: por eso te mareas cuando das muchas vueltas."],
+    ["cuerpo", "¿Qué tienes en los dedos que es único y no tiene nadie más?", "Las huellas dactilares", "Las uñas", "Las arrugas", "Las huellas dactilares. Ni los gemelos idénticos las tienen iguales."],
+    ["cuerpo", "¿Cuánto dura más o menos un parpadeo?", "Un tercio de segundo", "Dos segundos", "Cinco segundos", "Un tercio de segundo, más o menos. Y parpadeas miles de veces al día."],
+    ["cuerpo", "¿Qué hacen unos músculos diminutos cuando se te pone la piel de gallina?", "Levantan cada pelo", "Cambian el color de la piel", "Sacan sudor", "Levantan cada pelo. Pasa con el frío o con un buen susto."],
+    ["cuerpo", "¿Cuál es el músculo que más trabaja sin descansar nunca?", "El corazón", "El bíceps", "La lengua", "El corazón: late sin parar desde antes de nacer."],
+    ["cuerpo", "¿Qué órgano usamos para pensar?", "El cerebro", "El corazón", "El hígado", "El cerebro: pesa cerca de un kilo y medio y gasta una quinta parte de tu energía."],
+
+    ["planeta", "¿Cuál es el océano más grande?", "El Pacífico", "El Atlántico", "El Índico", "El Pacífico: cabrían en él todos los continentes juntos."],
+    ["planeta", "¿Cuál es la montaña más alta del mundo?", "El Everest", "El Aconcagua", "El Kilimanjaro", "El Everest: 8.849 metros sobre el nivel del mar. El Aconcagua es la más alta de América."],
+    ["planeta", "¿Cuál es el desierto cálido más grande?", "El Sahara", "Atacama", "Gobi", "El Sahara. Si se cuentan los desiertos fríos, la Antártida es aún más grande."],
+    ["planeta", "¿En qué mar flotas sin esfuerzo porque es saladísimo?", "En el mar Muerto", "En el mar Caribe", "En el mar del Norte", "En el mar Muerto: su agua tiene un 34 % de sal, diez veces más que el océano.", "mar"],
+    ["planeta", "¿Cuánto de la Tierra está cubierto de agua?", "Unas tres cuartas partes", "La mitad", "Una cuarta parte", "Más o menos un 71 %. Casi toda es agua salada."],
+    ["planeta", "¿Qué río lleva más agua en el mundo?", "El Amazonas", "El Nilo", "El Misisipi", "El Amazonas lleva más agua que cualquier otro río del planeta."],
+    ["planeta", "¿Qué es la lava?", "Roca derretida que sale de un volcán", "Agua hirviendo", "Arena muy caliente", "Roca derretida. Bajo tierra se llama magma; cuando sale, lava."],
+    ["planeta", "¿Cuál es el continente más frío?", "La Antártida", "Europa", "Asia", "La Antártida: allí se midió la temperatura más baja de la Tierra."],
+    ["planeta", "¿Cuál es la selva tropical más grande del mundo?", "La Amazonía", "La del Congo", "La de Borneo", "La Amazonía, repartida entre nueve países de Sudamérica."],
+    ["planeta", "¿Qué provoca sobre todo las mareas del mar?", "La Luna", "El viento", "Las ballenas", "La Luna: su gravedad tira del agua. El Sol también ayuda un poco."],
+    ["planeta", "¿Qué capa de la Tierra está en el centro?", "El núcleo", "El manto", "La corteza", "El núcleo, de hierro y níquel, tan caliente como la superficie del Sol."],
+    ["planeta", "¿Qué son los corales?", "Animales", "Plantas", "Rocas", "Animales diminutos que viven en colonias y construyen los arrecifes."],
+    ["planeta", "¿Cuál es la cascada más alta del mundo?", "El Salto Ángel", "Las cataratas del Niágara", "Las cataratas del Iguazú", "El Salto Ángel, en Venezuela: casi un kilómetro de caída."],
+    ["planeta", "¿Dónde está el punto más bajo de tierra firme?", "A orillas del mar Muerto", "En el Sahara", "En la Antártida", "A orillas del mar Muerto, unos 430 metros bajo el nivel del mar.", "mar"],
+    ["planeta", "¿De qué árbol sale el chocolate?", "Del cacao", "Del café", "De la palmera", "Del cacao, un árbol que nació en América."],
+    ["planeta", "¿Qué fruta lleva los puntitos por fuera?", "La fresa", "El mango", "La uva", "La fresa. Cada puntito es en realidad un frutito con su semilla."],
+    ["planeta", "¿Qué parte de la planta chupa el agua de la tierra?", "La raíz", "La flor", "La hoja", "La raíz. El agua sube luego por el tallo hasta las hojas."],
+    ["planeta", "¿Qué sueltan las plantas cuando hacen la fotosíntesis?", "Oxígeno", "Humo", "Dióxido de carbono", "Oxígeno. Toman dióxido de carbono, agua y luz, y sueltan el oxígeno que respiras."],
+    ["planeta", "¿Cómo se llama un huracán en el Pacífico de Asia?", "Tifón", "Tornado", "Monzón", "Tifón. Es lo mismo que un huracán, solo cambia el nombre según el océano."],
+    ["planeta", "¿Qué árbol da las bellotas?", "El roble", "El pino", "La palmera", "El roble. Las ardillas las entierran y de algunas se olvidan: así nacen robles nuevos."],
+    ["planeta", "¿De qué planta sale casi todo el azúcar?", "De la caña de azúcar", "Del trigo", "Del cacao", "De la caña de azúcar. El resto sale de la remolacha."],
+
+    ["mundo", "¿Cuál es el país más grande del mundo?", "Rusia", "Canadá", "China", "Rusia: es casi el doble de grande que Canadá, el segundo."],
+    ["mundo", "¿Cuál es el país más grande de Sudamérica?", "Brasil", "Argentina", "Perú", "Brasil: ocupa casi la mitad de Sudamérica."],
+    ["mundo", "¿Cuál es la capital de México?", "Ciudad de México", "Guadalajara", "Monterrey", "Ciudad de México, una de las ciudades más grandes del mundo."],
+    ["mundo", "¿Cuál es la capital de Colombia?", "Bogotá", "Medellín", "Cali", "Bogotá, a unos 2.600 metros de altura."],
+    ["mundo", "¿Cuál es la capital de Argentina?", "Buenos Aires", "Córdoba", "Rosario", "Buenos Aires, a orillas del Río de la Plata."],
+    ["mundo", "¿Cuál es la capital de Perú?", "Lima", "Cusco", "Arequipa", "Lima. Cusco fue la capital de los incas."],
+    ["mundo", "¿Cuál es la capital de República Dominicana?", "Santo Domingo", "Santiago", "Punta Cana", "Santo Domingo: la ciudad fundada por europeos más antigua de América que sigue en pie."],
+    ["mundo", "¿Cuál es la capital de España?", "Madrid", "Barcelona", "Sevilla", "Madrid, justo en el centro de la península."],
+    ["mundo", "¿Cuál es la capital de Estados Unidos?", "Washington D. C.", "Nueva York", "Los Ángeles", "Washington D. C. Nueva York es la ciudad más grande, pero no la capital."],
+    ["mundo", "¿En qué país están las pirámides de Guiza?", "Egipto", "México", "Perú", "Egipto. México también tiene pirámides famosas, como las de Teotihuacán."],
+    ["mundo", "¿En qué país está Machu Picchu?", "Perú", "Bolivia", "Chile", "Perú: la ciudad inca está en lo alto de los Andes."],
+    ["mundo", "¿Qué canal une el Atlántico y el Pacífico?", "El canal de Panamá", "El canal de Suez", "El canal de la Mancha", "El canal de Panamá, abierto en 1914."],
+    ["mundo", "¿Qué idioma se habla en Brasil?", "Portugués", "Español", "Francés", "Portugués, por la colonización portuguesa."],
+    ["mundo", "¿Qué país tiene más hablantes de español?", "México", "España", "Colombia", "México: más de 120 millones de personas."],
+    ["mundo", "¿En qué ciudad está la Torre Eiffel?", "París", "Londres", "Roma", "París. Se construyó para una feria de 1889 e iba a ser temporal."],
+    ["mundo", "¿Qué gran río pasa por Egipto?", "El Nilo", "El Amazonas", "El Danubio", "El Nilo: sin él, Egipto sería casi todo desierto."],
+    ["mundo", "¿Qué país tiene forma de bota?", "Italia", "Chile", "Grecia", "Italia, en el mar Mediterráneo."],
+    ["mundo", "¿Qué país es el más largo y estrecho de Sudamérica?", "Chile", "Argentina", "Ecuador", "Chile: más de 4.000 km de largo y, de media, menos de 200 km de ancho."],
+    ["mundo", "¿Qué isla comparten Haití y República Dominicana?", "La Española", "Cuba", "Puerto Rico", "La Española, la segunda isla más grande del Caribe."],
+    ["mundo", "¿En qué ciudad los taxistas memorizan unas 25.000 calles?", "Londres", "Nueva York", "Madrid", "Londres: para su licencia aprenden la ciudad entera sin GPS.", "taxi"],
+    ["mundo", "¿Qué país tiene más habitantes?", "India", "China", "Estados Unidos", "India: pasó a China en 2023."],
+    ["mundo", "¿En qué continente está Egipto?", "África", "Asia", "Europa", "En África, aunque su península del Sinaí ya está en Asia."],
+
+    ["espacio", "¿Cuál es el planeta más cercano al Sol?", "Mercurio", "Venus", "Marte", "Mercurio, el más pequeño de los ocho."],
+    ["espacio", "¿Cuál es el planeta más grande del sistema solar?", "Júpiter", "Saturno", "La Tierra", "Júpiter: dentro cabrían más de mil Tierras."],
+    ["espacio", "¿Qué planeta llaman «el planeta rojo»?", "Marte", "Júpiter", "Venus", "Marte. Su suelo tiene óxido de hierro, como la herrumbre."],
+    ["espacio", "¿Qué planeta tiene los anillos más famosos?", "Saturno", "Marte", "Mercurio", "Saturno. Sus anillos son hielo y roca. Júpiter, Urano y Neptuno también tienen, pero muy finos."],
+    ["espacio", "¿Cuántos planetas tiene el sistema solar?", "Ocho", "Nueve", "Siete", "Ocho. Plutón pasó a ser planeta enano en 2006."],
+    ["espacio", "¿Qué es el Sol?", "Una estrella", "Un planeta", "Un cometa", "Una estrella, la más cercana a nosotros."],
+    ["espacio", "¿Cuánto tarda la Tierra en dar la vuelta al Sol?", "Un año", "Un mes", "Un día", "Un año: unos 365 días y cuarto. Por eso cada cuatro años hay un 29 de febrero."],
+    ["espacio", "¿Cuánto tarda la Tierra en girar sobre sí misma?", "Un día", "Un año", "Una semana", "Un día. Por eso tenemos día y noche."],
+    ["espacio", "¿Quién fue la primera persona en pisar la Luna?", "Neil Armstrong", "Yuri Gagarin", "Buzz Aldrin", "Neil Armstrong, en 1969. Buzz Aldrin bajó justo después."],
+    ["espacio", "¿Quién fue el primer ser humano en viajar al espacio?", "Yuri Gagarin", "Neil Armstrong", "Valentina Tereshkova", "Yuri Gagarin, en 1961. Valentina Tereshkova fue la primera mujer, en 1963."],
+    ["espacio", "¿Cuál es el planeta más caliente?", "Venus", "Mercurio", "Marte", "Venus, aunque Mercurio esté más cerca del Sol: su aire espeso atrapa el calor."],
+    ["espacio", "¿Cuánto tarda la luz del Sol en llegar a la Tierra?", "Unos 8 minutos", "Un segundo", "Un día", "Unos 8 minutos. Ves el Sol como era hace 8 minutos."],
+    ["espacio", "¿Cómo se llama nuestra galaxia?", "La Vía Láctea", "Andrómeda", "Orión", "La Vía Láctea. Andrómeda es la galaxia grande más cercana."],
+    ["espacio", "¿Qué es una estrella fugaz?", "Una piedrita que arde al entrar en el aire", "Una estrella que se cae", "Un satélite que se apaga", "Un trocito de roca del espacio que arde al entrar en la atmósfera."],
+    ["espacio", "¿Qué animal diminuto aguantó diez días en el vacío del espacio?", "El tardígrado", "La hormiga", "La cucaracha", "El tardígrado, en 2007. Al volver, muchos revivieron.", "tardi"],
+    ["espacio", "¿Por qué vemos siempre la misma cara de la Luna?", "Gira al mismo ritmo que da la vuelta a la Tierra", "Porque no gira", "Porque la otra cara está siempre de noche", "Tarda lo mismo en girar sobre sí misma que en dar la vuelta a la Tierra."],
+
+    ["ciencia", "¿A qué temperatura hierve el agua a nivel del mar?", "100 °C", "50 °C", "200 °C", "A 100 °C. En lo alto de una montaña hierve antes, con menos calor."],
+    ["ciencia", "¿A qué temperatura se congela el agua?", "0 °C", "10 °C", "−20 °C", "A 0 °C. Con sal se congela a menos temperatura: por eso echan sal en las carreteras."],
+    ["ciencia", "¿Qué es el H₂O?", "Agua", "Sal", "Oxígeno", "Agua: dos átomos de hidrógeno y uno de oxígeno."],
+    ["ciencia", "¿Qué va más rápido, la luz o el sonido?", "La luz", "El sonido", "Van igual", "La luz. Por eso ves el rayo antes de oír el trueno."],
+    ["ciencia", "¿Qué atrae un imán?", "El hierro", "La madera", "El plástico", "El hierro, y algunos otros metales como el níquel."],
+    ["ciencia", "¿Por qué sale el arcoíris?", "Las gotas de lluvia separan la luz del sol en colores", "Por el polvo de colores del aire", "Porque el mar se refleja en el cielo", "Cada gota hace de prisma y separa la luz blanca en sus colores."],
+    ["ciencia", "¿De qué gas está hecho casi todo el aire?", "Nitrógeno", "Oxígeno", "Dióxido de carbono", "Nitrógeno, casi un 78 %. El oxígeno es solo un 21 %."],
+    ["ciencia", "¿Por qué flota un barco de hierro?", "Su forma hueca empuja mucha agua", "Porque el hierro flota", "Por el motor", "Su forma hueca aparta mucha agua, y el agua lo empuja hacia arriba."],
+    ["ciencia", "¿A quién se le atribuye la ley de la gravedad, con la famosa manzana?", "Isaac Newton", "Albert Einstein", "Charles Darwin", "Isaac Newton. Lo de la manzana en la cabeza es leyenda, pero la vio caer."],
+    ["ciencia", "¿Quién propuso la teoría de la relatividad?", "Albert Einstein", "Isaac Newton", "Galileo Galilei", "Albert Einstein, a principios del siglo XX."],
+    ["ciencia", "¿Qué mide un termómetro?", "La temperatura", "El peso", "La velocidad", "La temperatura."],
+    ["ciencia", "¿Qué es la sal de la cocina?", "Cloruro de sodio", "Azúcar", "Calcio", "Cloruro de sodio: sodio y cloro unidos."],
+    ["ciencia", "¿Por qué una manzana cortada se pone marrón?", "Por el oxígeno del aire", "Por la luz", "Por el frío", "Reacciona con el oxígeno del aire. Unas gotas de limón lo frenan."],
+    ["ciencia", "¿Qué pesa más, un kilo de hierro o un kilo de plumas?", "Pesan lo mismo", "El hierro", "Las plumas", "Lo mismo: un kilo es un kilo. Las plumas solo ocupan mucho más."],
+    ["ciencia", "¿Qué metal es líquido a temperatura ambiente?", "El mercurio", "El hierro", "El oro", "El mercurio. Antes se usaba en los termómetros."],
+    ["ciencia", "¿Qué vitamina tiene mucho la naranja?", "La vitamina C", "La vitamina D", "La vitamina B12", "La vitamina C. La guayaba y el pimiento tienen todavía más."],
+    ["ciencia", "¿Por qué el cielo es azul?", "El aire esparce más la luz azul del sol", "Refleja el color del mar", "Por el humo de las ciudades", "El aire esparce más la luz azul que la roja. No tiene nada que ver con el mar."],
+    ["ciencia", "¿Cuántos lados tiene un hexágono?", "Seis", "Cinco", "Ocho", "Seis, como las celdas de los panales de las abejas."],
+    ["ciencia", "¿Qué escala se usa para decir lo fuerte que es un terremoto?", "La de Richter", "La de Celsius", "La de Beaufort", "La de Richter, o la de magnitud, que es su heredera. Beaufort mide el viento."],
   ];
   // Mundos de Pangea: cambian cada 15 obstáculos. Cada uno con su paleta, sus capas y un dato.
   const MUNDOS = [
@@ -278,20 +403,18 @@
       tallo: ["#3b82a6", "#bae6fd"], adorno: "#ffffff", deco: "brillo", punta: "#e0f2fe", bicho: "copo", particula: "nieve", led: "#a7f3d0",
       dato: "En la Antártida, dos tardígrados volvieron a moverse tras más de 30 años congelados." },
   ];
-  // Álbum: un cromo por cada vídeo (se gana acertando una pregunta de ese vídeo) y uno por mundo.
+  // Álbum: un cromo por cada tema (se gana acertando una pregunta de ese tema) y uno por mundo.
   const CROMOS = [
     { id: "colibri", icono: "🌺", nombre: "Colibrí", dato: "Puede batir las alas hasta unas 80 veces por segundo.", como: "Termina tu primer vuelo." },
     { id: "arrecife", icono: "🪸", nombre: "Arrecife", dato: "Los arrecifes de coral ocupan menos del 1 % del océano y dan casa a una de cada cuatro especies marinas.", como: "Llega al mundo Arrecife." },
     { id: "desierto", icono: "🏜️", nombre: "Desierto", dato: "La orilla del mar Muerto está unos 430 m bajo el nivel del mar.", como: "Llega al mundo Desierto." },
     { id: "hielo", icono: "❄️", nombre: "Hielo", dato: "En la Antártida, dos tardígrados revivieron tras más de 30 años congelados.", como: "Llega al mundo Hielo." },
-    { id: "mar", icono: "🧂", nombre: "Mar Muerto", dato: "Su agua tiene un 34 % de sal: por eso flotas sin esfuerzo.", como: "Acierta una pregunta del mar Muerto." },
-    { id: "taxi", icono: "🚕", nombre: "Taxistas de Londres", dato: "Memorizan unas 25.000 calles y se les agranda el hipocampo.", como: "Acierta una pregunta de los taxistas." },
-    { id: "medusa", icono: "🪼", nombre: "Medusa inmortal", dato: "Mide unos 4 o 5 mm y puede volver a ser pólipo.", como: "Acierta una pregunta de la medusa." },
-    { id: "hioides", icono: "🦴", nombre: "Hueso hioides", dato: "No está unido a ningún otro hueso: cuelga de músculos.", como: "Acierta una pregunta del hioides." },
-    { id: "tardi", icono: "🐻", nombre: "Oso de agua", dato: "El tardígrado aguantó diez días en el vacío del espacio.", como: "Acierta una pregunta del tardígrado." },
-    { id: "madres", icono: "🦘", nombre: "Canguro rojo", dato: "Al nacer mide unos 2 cm, como una gominola.", como: "Acierta una pregunta de las madres." },
-    { id: "vago", icono: "🧠", nombre: "Nervio vago", dato: "Otto Loewi soñó el experimento que le dio el Nobel.", como: "Acierta una pregunta del nervio vago." },
-    { id: "cornea", icono: "👁️", nombre: "Córnea", dato: "Respira del aire: no tiene ni un vaso sanguíneo.", como: "Acierta una pregunta de la córnea." },
+    { id: "animales", icono: "🐾", nombre: "Animales", dato: "La ballena azul es el animal más grande que ha existido.", como: "Acierta una pregunta de animales." },
+    { id: "cuerpo", icono: "🫀", nombre: "Cuerpo humano", dato: "Un adulto tiene unos 206 huesos.", como: "Acierta una pregunta del cuerpo humano." },
+    { id: "planeta", icono: "🌍", nombre: "Planeta Tierra", dato: "El agua cubre unas tres cuartas partes de la Tierra.", como: "Acierta una pregunta del planeta." },
+    { id: "mundo", icono: "🗺️", nombre: "Geografía", dato: "México es el país con más hablantes de español.", como: "Acierta una pregunta de geografía." },
+    { id: "espacio", icono: "🪐", nombre: "Espacio", dato: "La luz del Sol tarda unos 8 minutos en llegar a la Tierra.", como: "Acierta una pregunta del espacio." },
+    { id: "ciencia", icono: "🔬", nombre: "Ciencia", dato: "Ves el rayo antes de oír el trueno: la luz va mucho más rápido.", como: "Acierta una pregunta de ciencia." },
   ];
   const CROMO_MUNDO = [null, "arrecife", "desierto", "hielo"];
   // Letrero de luces LED del fondo: los canales y redes. Si un día hay patrocinador, se añade aquí una línea.
@@ -300,17 +423,48 @@
   // con Google H5 Games Ads (adBreak) y el usuario haya dado de alta su cuenta.
   // Nunca se dan premios por abrir o ver nuestros vídeos: Facebook y YouTube lo prohíben.
   const ANUNCIOS = false;
-  // Dónde vive el juego: "web" (itch.io y el enlace propio) o "crazygames" (lo cambia crazygames\empaquetar.py).
+  // Dónde vive el juego: "web" (itch.io y el enlace propio), "crazygames" o "gamedistribution" (lo cambia el empaquetar.py de cada carpeta).
   // En CrazyGames los anuncios los pone su SDK y ellos reparten lo que se gana. Nunca se premia ver nuestros vídeos.
   const PLATAFORMA = "web";
   const CG = () => {
     const sdk = PLATAFORMA === "crazygames" && window.CrazyGames && window.CrazyGames.SDK;
     return sdk && sdk.environment !== "disabled" ? sdk : null;
   };
+  // GameDistribution (lo pone gamedistribution\empaquetar.py): su SDK pausa y silencia con sus eventos.
+  const GD_ID = "";
+  let premioGD = false, anuncioGD = false;
+  if (PLATAFORMA === "gamedistribution") {
+    window.GD_OPTIONS = {
+      gameId: GD_ID,
+      onEvent: (e) => {
+        if (e.name === "SDK_GAME_PAUSE") { anuncioGD = true; silenciar(true); }
+        else if (e.name === "SDK_GAME_START") silenciar(false);
+        else if (e.name === "SDK_REWARDED_WATCH_COMPLETE") premioGD = true;
+      },
+    };
+    const s = document.createElement("script");
+    s.id = "gamedistribution-jssdk"; s.src = "https://html5.api.gamedistribution.com/main.min.js";
+    document.head.appendChild(s);
+  }
+  const GD = () => (PLATAFORMA === "gamedistribution" && typeof window.gdsdk !== "undefined" && typeof window.gdsdk.showAd === "function" ? window.gdsdk : null);
+  let preroll = PLATAFORMA === "gamedistribution";
   const plat = {
     jugando: (si) => { try { const sdk = CG(); if (sdk) si ? sdk.game.gameplayStart() : sdk.game.gameplayStop(); } catch {} },
     // tipo: "midgame" (entre partidas) o "rewarded" (el jugador lo pide). despues(true) si el anuncio se vio entero.
     anuncio: (tipo, despues) => {
+      const gd = GD();
+      if (gd) {
+        premioGD = false; anuncioGD = false;
+        let hecho = false;
+        const fin = (ok) => { if (hecho) return; hecho = true; silenciar(false); despues(ok); };
+        // Si en 4 s no empieza ningún anuncio, se sigue jugando: nunca se queda el juego parado esperando.
+        setTimeout(() => { if (!anuncioGD) fin(false); }, 4000);
+        // El premio solo cuenta si llegó su aviso de «visto entero».
+        gd.showAd(tipo === "rewarded" ? "rewarded" : undefined)
+          .then(() => setTimeout(() => fin(tipo === "rewarded" ? premioGD : true), 300))
+          .catch(() => fin(false));
+        return;
+      }
       const sdk = CG();
       if (!sdk) { despues(false); return; }
       try {
@@ -321,7 +475,7 @@
         });
       } catch { silenciar(false); despues(false); }
     },
-    hayAnuncios: () => !!CG() || (ANUNCIOS && typeof window.adBreak === "function"),
+    hayAnuncios: () => !!CG() || !!GD() || (ANUNCIOS && typeof window.adBreak === "function"),
   };
   // Las marcas también van donde mira el jugador: en el cielo, muy suaves, y en carteles colgados de los tallos.
   const MARCAS = ["PANGEA24", "MYSTERIES24", "ECONOMÍA2407", "DURMIENDO DE LA MANO DE DIOS"];
@@ -464,6 +618,7 @@
   // ---------- Álbum de cromos ----------
   let cromos = [];
   try { cromos = JSON.parse(localStorage.getItem("colibri-cromos")) || []; } catch {}
+  cromos = cromos.filter((id) => CROMOS.some((c) => c.id === id));
   const pintarAlbumBotones = () => {
     const txt = `Álbum ${cromos.length}/${CROMOS.length}`;
     $("b-album").textContent = txt;
@@ -485,11 +640,6 @@
       const n = document.createElement("b"); n.textContent = tiene ? c.nombre : "???";
       const x = document.createElement("span"); x.textContent = tiene ? c.dato : c.como;
       d.append(i, n, x);
-      // Solo una recomendación: ver el vídeo no da nada.
-      if (tiene && VIDEOS[c.id] && PLATAFORMA === "web") {
-        const a = document.createElement("a"); a.href = VIDEOS[c.id][1]; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Ver vídeo ↗";
-        d.append(a);
-      }
       caja.append(d);
     }
     $("album-titulo").textContent = cromos.length === CROMOS.length ? "¡Álbum completo!" : `Tienes ${cromos.length} de ${CROMOS.length}`;
@@ -660,8 +810,10 @@
     estado = "vuelo"; ultimo = performance.now();
     guia = 2; tocado = false; pulsado = false; $("guia").hidden = false;
   };
-  $("jugar").onclick = empezar;
-  $("regalo-jugar").onclick = () => { $("regalo").hidden = true; empezar(); };
+  // En GameDistribution el primer «Jugar» pone su anuncio de entrada (lo exigen); después, entre partidas.
+  const conEntrada = (f) => { if (preroll && GD()) { preroll = false; plat.anuncio("midgame", f); } else f(); };
+  $("jugar").onclick = () => conEntrada(empezar);
+  $("regalo-jugar").onclick = () => { $("regalo").hidden = true; conEntrada(empezar); };
   pintarRegalo(); pintarAlbumBotones();
   $("otra").onclick = () => (regaloDisponible() ? abrirRegalo() : plat.anuncio("midgame", () => empezar()));
 
@@ -695,7 +847,7 @@
     const [clave, texto, buena, ...resto] = actual;
     $("vit-titulo").textContent = titulo;
     $("texto-pregunta").textContent = texto;
-    $("del-video").textContent = `Del vídeo de Pangea24: «${VIDEOS[clave][0]}»`;
+    $("del-video").textContent = `${TEMAS[clave][0]} ${TEMAS[clave][1]} · preguntas de Pangea24`;
     const caja = $("opciones");
     caja.replaceChildren();
     for (const op of barajar([buena, resto[0], resto[1]])) {
@@ -704,7 +856,7 @@
       b.onclick = () => responder(b, op === buena);
       caja.append(b);
     }
-    caja.hidden = false; $("explica").hidden = true; $("seguir").hidden = true;
+    caja.hidden = false; $("explica").hidden = true; $("seguir").hidden = true; $("mas-pangea").hidden = true;
     $("pista").hidden = false;
     mostrar("pregunta");
   };
@@ -717,24 +869,32 @@
     puntos = Math.max(0, puntos - 3); pintarMarcador();
     $("pista").hidden = true;
   };
-  // Si fallas, fallaste: no se enseña la respuesta buena (está en el vídeo).
+  // Si fallas, se enseña la buena: son preguntas de cultura general y así se aprende.
   const responder = (boton, bien) => {
-    const explica = actual[5];
+    const explica = actual[5], buena = `La buena era: ${actual[2]}.`;
     for (const b of $("opciones").children) b.disabled = true;
     boton.classList.add(bien ? "bien" : "mal");
     if (bien) SON.bien(); else { SON.mal(); vibrar(40); }
     $("pista").hidden = true;
     fallada = !bien;
     let texto;
-    if (modo === "vitamina") texto = bien ? `¡Vitamina! Sigues volando. ${explica}` : "¡Fallaste! Se acabó el vuelo.";
+    if (modo === "vitamina") texto = bien ? `¡Vitamina! Sigues volando. ${explica}` : `¡Fallaste! ${buena} Se acabó el vuelo.`;
     else if (bien && vidas < VIDAS_MAX) { vidas++; texto = `¡Ganaste una vida! ${explica}`; }
     else if (bien) { puntos += 5; texto = `¡+5 puntos! ${explica}`; }
-    else { puntos = Math.max(0, puntos - 5); texto = "¡Fallaste! Pierdes 5 puntos. Sigue volando."; }
+    else { puntos = Math.max(0, puntos - 5); texto = `¡Fallaste! Pierdes 5 puntos. ${buena}`; }
     if (bien && ganarCromo(actual[0])) texto += " 🃏 ¡Cromo nuevo para tu álbum!";
     pintarMarcador();
     $("explica").textContent = texto;
     $("explica").hidden = false;
-    if (modo === "vitamina" && !bien) { setTimeout(() => { $("pregunta").hidden = true; terminar(); }, 1400); return; }
+    if (modo === "vitamina" && !bien) { setTimeout(() => { $("pregunta").hidden = true; terminar(); }, 2200); return; }
+    // Pangea24 siempre a la vista: «Míralo aquí» si tenemos vídeo de ese tema; si no, «Síguenos».
+    // Solo es una recomendación: ver el vídeo no da nada. En los portales no se manda a nadie fuera.
+    const v = actual[6] && VIDEOS[actual[6]], mas = $("mas-pangea");
+    if (PLATAFORMA === "web") {
+      mas.href = v ? v[1] : CANAL;
+      mas.textContent = v ? `▶ Míralo aquí: «${v[0]}»` : "Síguenos en Pangea24 ↗";
+      mas.hidden = false;
+    } else if (!v) $("explica").textContent += " · Síguenos en Pangea24.";
     $("seguir").hidden = false;
     $("seguir").focus();
   };
@@ -787,7 +947,8 @@
   $("anuncio").onclick = () => {
     // Sigue en el mismo nivel, como con una vitamina acertada.
     const seguir = () => { revivido = true; $("fin").hidden = true; modo = "vitamina"; plat.jugando(true); $("seguir").onclick(); };
-    if (CG()) { plat.anuncio("rewarded", (visto) => { if (visto) seguir(); }); return; }
+    // Si no hay anuncio disponible, el botón desaparece: nunca se queda un botón que no hace nada.
+    if (CG() || GD()) { plat.anuncio("rewarded", (visto) => { if (visto) seguir(); else $("anuncio").hidden = true; }); return; }
     window.adBreak({ type: "reward", name: "vida-extra", beforeReward: (mostrar) => mostrar(), adViewed: seguir, adDismissed: () => {} });
   };
 
@@ -837,6 +998,7 @@
     texto(`Código del reto: ${clave}`, 1630, 56, "#fff6e8", false);
     texto("Juega gratis con el enlace del mensaje", 1715, 40, "#7df9ff", false);
     texto("y toca «¿Te retaron?»", 1770, 40, "#7df9ff", false);
+    texto("by PANGEA24 · YouTube · Facebook · Instagram · TikTok", 1880, 34, "#2fd3a0", false);
     c.toBlob((b) => listo(b), "image/png");
   });
   const compartir = async () => {
@@ -846,6 +1008,8 @@
     const texto = `${bonito(retos.nombre)} te reta en el Colibrí de Pangea24: hice ${marca} puntos. ¿Me superas? Abre el juego, toca «¿Te retaron?» y pega este mensaje. Código: ${clave}`;
     let enlace = `${URL_JUEGO}#reto=${clave}`;
     try { const sdk = CG(); if (sdk) enlace = sdk.game.inviteLink({ reto: clave }); } catch {}
+    // En GameDistribution no se manda a nadie fuera: solo el código, que se pega en «¿Te retaron?».
+    if (PLATAFORMA === "gamedistribution") enlace = "";
     try {
       // Con imagen si el móvil lo permite (WhatsApp, historias); si no, solo el texto.
       let archivo = null;
@@ -853,7 +1017,7 @@
       if (archivo && navigator.canShare && navigator.canShare({ files: [archivo] })) {
         await navigator.share({ title: "Colibrí · Pangea24", text: `${texto}\n${enlace}`, files: [archivo] }); return;
       }
-      if (navigator.share) { await navigator.share({ title: "Colibrí · Pangea24", text: texto, url: enlace }); return; }
+      if (navigator.share) { await navigator.share({ title: "Colibrí · Pangea24", text: texto, ...(enlace ? { url: enlace } : {}) }); return; }
       await navigator.clipboard.writeText(`${texto}\n${enlace}`);
       $("compartir").textContent = "Reto copiado: pégalo en WhatsApp";
     } catch (e) { if (!e || e.name !== "AbortError") $("compartir").textContent = `Tu código: ${clave}`; }
